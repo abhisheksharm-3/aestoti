@@ -55,7 +55,7 @@ const config = {
 				sm: "calc(var(--radius) - 4px)"
 			},
 			fontFamily: {
-				sans: ["Roboto Flex", ...fontFamily.sans]
+				sans: ["Roboto Flex", "sans", ...fontFamily.sans]
 			}
 		}
 	},
