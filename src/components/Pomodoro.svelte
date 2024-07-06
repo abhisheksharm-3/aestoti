@@ -91,8 +91,10 @@
       currentModeIndex = 0; // Always go back to Focus mode
     }
     currentTime = modes[currentModeIndex].duration;
+    if (audio) {
     audio.pause();
     audio.currentTime = 0;
+  }
   }
 
   function toggleTimer() {
@@ -119,7 +121,9 @@
 
   onDestroy(() => {
     clearInterval(timer);
+    if (audio) {
     audio.pause();
+  }
   });
 </script>
 
