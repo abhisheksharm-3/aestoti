@@ -113,7 +113,7 @@
   function skipMode() {
     clearInterval(timer);
     moveToNextMode();
-    playPauseIcon = RiPlayLargeFill;
+    // playPauseIcon = RiPlayLargeFill;
     if (isTimerRunning) {
       startTimer();
     }
