@@ -23,7 +23,7 @@
       <Label class="text-left flex-grow" for="timer-auto"
         >Auto Resume Timer</Label
       >
-      <Switch id="timer-auto" bind:checked={$settings.auto_time} />
+      <Switch id="timer-auto" disabled bind:checked={$settings.auto_time} />
     </div>
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
       <Label class="text-left flex-grow" for="sound">Sound</Label>
