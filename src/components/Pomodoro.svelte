@@ -185,7 +185,7 @@
     <div class="flex space-x-4 items-center">
       <Drawer.Trigger>
         <Button
-          class="bg-[#FF4C4C26] text-[#471515] dark:text-white rounded-2xl p-6 hover:bg-red-950 text-2xl font-bold transition-transform duration-300 transform hover:scale-110"
+          class="bg-[#FF4C4C26] text-[#471515] dark:text-white rounded-2xl p-6 hover:bg-red-500/70 dark:hover:bg-red-950 text-2xl font-bold transition-transform duration-300 transform hover:scale-110"
         >
           <RiMoreFill />
         </Button>
@@ -197,7 +197,7 @@
         <svelte:component this={playPauseIcon} />
       </Button>
       <Button
-        class="bg-[#FF4C4C26] text-2xl font-bold text-[#471515] dark:text-white rounded-2xl p-6 hover:bg-red-950 transition-transform duration-300 transform hover:scale-110"
+        class="bg-[#FF4C4C26] text-2xl font-bold text-[#471515] dark:text-white rounded-2xl p-6 hover:bg-red-500/70 dark:hover:bg-red-950 transition-transform duration-300 transform hover:scale-110"
         on:click={skipMode}
       >
         <RiSkipForwardFill />

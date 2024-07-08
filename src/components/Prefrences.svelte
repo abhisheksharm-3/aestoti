@@ -7,9 +7,9 @@
   import type { Settings } from "$lib/store";
 
   let currentMode: string;
-  $: currentMode = $mode || "light";
+  $: currentMode = $mode || "dark";
 
-  $: isLightMode = currentMode === "light";
+  $: isLightMode = currentMode === "dark";
 
   $: if ($settings) {
     settings.set($settings);
@@ -21,7 +21,7 @@
 >
   <div id="switch" class="flex items-center justify-center gap-3 flex-col">
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
-      <Label class="text-left flex-grow" for="mode">Light Mode</Label>
+      <Label class="text-left flex-grow" for="mode">Dark Mode</Label>
       <Switch id="mode" on:click={toggleMode} bind:checked={isLightMode}/>
     </div>
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
