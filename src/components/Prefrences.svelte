@@ -2,9 +2,14 @@
   import Input from "$lib/components/ui/input/input.svelte";
   import Label from "$lib/components/ui/label/label.svelte";
   import Switch from "$lib/components/ui/switch/switch.svelte";
-  import { toggleMode } from "mode-watcher";
+  import { mode, toggleMode } from "mode-watcher";
   import { settings } from "$lib/store";
   import type { Settings } from "$lib/store";
+
+  let currentMode: string;
+  $: currentMode = $mode || "light";
+
+  $: isLightMode = currentMode === "light";
 
   $: if ($settings) {
     settings.set($settings);
@@ -17,7 +22,7 @@
   <div id="switch" class="flex items-center justify-center gap-3 flex-col">
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
       <Label class="text-left flex-grow" for="mode">Light Mode</Label>
-      <Switch id="mode" on:click={toggleMode} />
+      <Switch id="mode" on:click={toggleMode} bind:checked={isLightMode}/>
     </div>
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
       <Label class="text-left flex-grow" for="timer-auto"
