@@ -14,26 +14,42 @@
   import DrawerComponent from "./../components/DrawerComponent.svelte";
   import { crossfade } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import { settings } from "$lib/store";
+  import { toast } from "svelte-sonner";
 
   interface Mode {
     title: string;
-    icon: typeof RiBrainLine | typeof RiCupLine | typeof RiTreeLine; // Icon component type
-    duration: number; // Duration in seconds
+    icon: typeof RiBrainLine | typeof RiCupLine | typeof RiTreeLine;
+    duration: number;
   }
 
-  const modes: Mode[] = [
-    { title: "Focus", icon: RiBrainLine, duration: 25 * 60 },
-    { title: "Short Break", icon: RiCupLine, duration: 5 * 60 },
-    { title: "Long Break", icon: RiTreeLine, duration: 15 * 60 },
-  ];
-
-  let currentModeIndex = 0; // Initial mode index (Focus)
-  let currentTime = modes[currentModeIndex].duration;
+  let currentModeIndex = 0;
   let isTimerRunning = false;
   let timer: number | undefined = undefined;
-  let focusSessions = 0; // To keep track of focus sessions completed
+  let focusSessions = 0;
   let playPauseIcon = RiPlayLargeFill;
   let audio: HTMLAudioElement;
+
+  // Box the currentTime to force reactivity
+  let currentTimeBox = { value: 0 };
+
+  $: modes = [
+    { title: "Focus", icon: RiBrainLine, duration: $settings.focus_length * 60 },
+    { title: "Short Break", icon: RiCupLine, duration: $settings.short_length * 60 },
+    { title: "Long Break", icon: RiTreeLine, duration: $settings.long_length * 60 },
+  ];
+
+  $: updateCurrentTime(modes[currentModeIndex].duration);
+
+  function updateCurrentTime(newDuration: number): void {
+    if (isTimerRunning) {
+      const oldDuration = modes[currentModeIndex].duration;
+      const progress = 1 - (currentTimeBox.value / oldDuration);
+      currentTimeBox.value = Math.round(newDuration * (1 - progress));
+    } else {
+      currentTimeBox.value = newDuration;
+    }
+  }
 
   const [send, receive] = crossfade({
     duration: 500,
@@ -63,18 +79,21 @@
 
   function startTimer() {
     timer = setInterval(() => {
-      if (currentTime > 0) {
-        currentTime--;
+      if (currentTimeBox.value > 0) {
+        currentTimeBox.value--;
       } else {
         clearInterval(timer);
         moveToNextMode();
       }
     }, 1000);
 
-    if (currentModeIndex === 0) {
-      audio.play().then(() => {
-        audio.loop = true;
-      }).catch(error => console.error('Audio playback error:', error));
+    if (currentModeIndex === 0 && $settings.sound) {
+      audio
+        .play()
+        .then(() => {
+          audio.loop = true;
+        })
+        .catch((error) => console.error("Audio playback error:", error));
     } else {
       audio.pause();
       audio.currentTime = 0;
@@ -83,24 +102,37 @@
 
   function moveToNextMode() {
     if (currentModeIndex === 0) {
-      // If currently in Focus mode
       focusSessions++;
-      currentModeIndex = focusSessions % 3 === 0 ? 2 : 1; // Every 3rd focus session, go to Long Break, otherwise Short Break
+      currentModeIndex = focusSessions % $settings.long_break_interval === 0 ? 2 : 1;
     } else {
-      // If currently in a break mode
-      currentModeIndex = 0; // Always go back to Focus mode
+      currentModeIndex = 0;
     }
-    currentTime = modes[currentModeIndex].duration;
+    updateCurrentTime(modes[currentModeIndex].duration);
     if (audio) {
-    audio.pause();
-    audio.currentTime = 0;
-  }
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    if ($settings.notification) {
+      toast.success("Timer Ended!", {
+      description: "Will Display Time Here",
+      action: {
+        label: "Skip",
+        onClick: () => console.info("Skip")
+      }
+    });
+    }
+    if ($settings.auto_time) {
+      startTimer();
+    } else {
+      isTimerRunning = false;
+      playPauseIcon = RiPlayLargeFill;
+    }
   }
 
   function toggleTimer() {
     if (isTimerRunning) {
       clearInterval(timer);
-      audio.pause();
+      if ($settings.sound) audio.pause();
       isTimerRunning = false;
       playPauseIcon = RiPlayLargeFill;
     } else {
@@ -113,7 +145,6 @@
   function skipMode() {
     clearInterval(timer);
     moveToNextMode();
-    // playPauseIcon = RiPlayLargeFill;
     if (isTimerRunning) {
       startTimer();
     }
@@ -122,10 +153,15 @@
   onDestroy(() => {
     clearInterval(timer);
     if (audio) {
-    audio.pause();
-  }
+      audio.pause();
+    }
   });
 </script>
+
+<svelte:head>
+  <title>{modes[currentModeIndex].title} for {formatTime(currentTimeBox.value).minutes} : {formatTime(currentTimeBox.value).seconds} @Aestoti</title>
+  <link rel="icon" href="/logo-short.png" />
+</svelte:head>
 
 <Drawer.Root>
   <audio bind:this={audio} src="/clock-sound-tick.mp3"></audio>
@@ -143,25 +179,25 @@
     <div
       class={`flex flex-col items-center text-9xl mb-12 tracking-widest ${isTimerRunning ? "font-extrabold transition-all duration-300" : "font-light transition-all duration-300"}`}
     >
-      <div>{formatTime(currentTime).minutes}</div>
-      <div>{formatTime(currentTime).seconds}</div>
+      <div>{formatTime(currentTimeBox.value).minutes}</div>
+      <div>{formatTime(currentTimeBox.value).seconds}</div>
     </div>
     <div class="flex space-x-4 items-center">
       <Drawer.Trigger>
         <Button
-          class="bg-[#FF4C4C26] text-white rounded-2xl p-6 hover:bg-red-950 text-2xl font-bold transition-transform duration-300 transform hover:scale-110"
+          class="bg-[#FF4C4C26] text-[#471515] dark:text-white rounded-2xl p-6 hover:bg-red-950 text-2xl font-bold transition-transform duration-300 transform hover:scale-110"
         >
           <RiMoreFill />
         </Button>
       </Drawer.Trigger>
       <Button
-        class="bg-[#FF4C4Cb5] text-white rounded-3xl p-8 hover:bg-red-700 text-3xl transition-transform duration-300 transform hover:scale-110"
+        class="bg-[#FF4C4Cb5] text-[#471515] dark:text-white rounded-3xl p-8 hover:bg-red-700 text-3xl transition-transform duration-300 transform hover:scale-110"
         on:click={toggleTimer}
       >
         <svelte:component this={playPauseIcon} />
       </Button>
       <Button
-        class="bg-[#FF4C4C26] text-2xl font-bold text-white rounded-2xl p-6 hover:bg-red-950 transition-transform duration-300 transform hover:scale-110"
+        class="bg-[#FF4C4C26] text-2xl font-bold text-[#471515] dark:text-white rounded-2xl p-6 hover:bg-red-950 transition-transform duration-300 transform hover:scale-110"
         on:click={skipMode}
       >
         <RiSkipForwardFill />

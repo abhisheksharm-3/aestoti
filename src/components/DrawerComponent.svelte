@@ -8,6 +8,7 @@
   import * as Drawer from "$lib/components/ui/drawer";
   import * as Tabs from "$lib/components/ui/tabs";
   import ComingSoon from "./ComingSoon.svelte";
+  import Prefrences from "./Prefrences.svelte";
 </script>
 
 <Drawer.Content>
@@ -17,15 +18,15 @@
   </Drawer.Header>
   <Tabs.Root value="prefrences" class="flex items-center justify-center flex-col gap-10">
     <Tabs.List class=" w-max flex gap-6">
-      <Tabs.Trigger value="stats"> <RiBarChart2Line /> Statistics</Tabs.Trigger>
-      <Tabs.Trigger value="prefrences"><RiSettings3Fill /> Prefrences</Tabs.Trigger>
-      <Tabs.Trigger value="shortcuts"><RiKeyboardBoxFill /> Shortcuts</Tabs.Trigger>
+      <Tabs.Trigger class="flex items-center gap-2" value="stats"> <RiBarChart2Line /> Statistics</Tabs.Trigger>
+      <Tabs.Trigger class="flex items-center gap-2" value="prefrences"><RiSettings3Fill /> Prefrences</Tabs.Trigger>
+      <Tabs.Trigger class="flex items-center gap-2" value="shortcuts"><RiKeyboardBoxFill /> Shortcuts</Tabs.Trigger>
     </Tabs.List>
     <Tabs.Content value="stats">
       <ComingSoon />
     </Tabs.Content>
     <Tabs.Content value="prefrences">
-      <ComingSoon />
+      <Prefrences />
     </Tabs.Content>
     <Tabs.Content value="shortcuts">
       <ComingSoon />
