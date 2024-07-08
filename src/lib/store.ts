@@ -11,8 +11,8 @@ export interface Settings {
 
 const initialSettings: Settings = {
   auto_time: false,
-  sound: false,
-  notification: false,
+  sound: true,
+  notification: true,
   focus_length: 25,
   long_break_interval: 3,
   short_length: 5,

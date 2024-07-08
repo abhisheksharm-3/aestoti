@@ -1,0 +1,33 @@
+{
+    "short_name": "Aestoti",
+    "name": "Aestoti - Focus Timer & Productivity App",
+    "start_url": "/",
+    "icons": [
+      {
+        "src": "logo_512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "background_color": "#FF4C4C",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#FF4C4C",
+    "shortcuts": [
+      {
+        "name": "Start Focus Session",
+        "short_name": "Focus",
+        "description": "Begin a new Pomodoro focus session",
+        "url": "/focus?source=pwa",
+        "icons": [{ "src": "/icons/focus_192.png", "sizes": "192x192" }]
+      },
+      {
+        "name": "View Statistics",
+        "short_name": "Stats",
+        "description": "Check your productivity statistics",
+        "url": "/stats?source=pwa",
+        "icons": [{ "src": "/icons/stats_192.png", "sizes": "192x192" }]
+      }
+    ],
+    "description": "Enhance your productivity with Aestoti's Pomodoro timer, task management, and AI-powered insights."
+  }
