@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import {
     RiBrainLine,
     RiCupLine,
@@ -29,6 +29,7 @@
   let focusSessions = 0;
   let playPauseIcon = RiPlayLargeFill;
   let audio: HTMLAudioElement;
+  let drawerOpen = false;
 
   // Box the currentTime to force reactivity
   let currentTimeBox = { value: 0 };
@@ -114,12 +115,12 @@
     }
     if ($settings.notification) {
       toast.success("Timer Ended!", {
-      description: "Will Display Time Here",
-      action: {
-        label: "Skip",
-        onClick: () => console.info("Skip")
-      }
-    });
+        description: "Will Display Time Here",
+        action: {
+          label: "Skip",
+          onClick: () => console.info("Skip")
+        }
+      });
     }
     if ($settings.auto_time) {
       startTimer();
@@ -150,6 +151,30 @@
     }
   }
 
+  function openSettings() {
+    drawerOpen = !drawerOpen;
+  }
+
+  function handleShortcut(event: KeyboardEvent) {
+    if (event.altKey && event.key === 's') {
+      event.preventDefault();
+      openSettings();
+    } else if (event.key === ' ') {
+      event.preventDefault();
+      toggleTimer();
+    } else if (event.altKey && event.key === 'n') {
+      event.preventDefault();
+      skipMode();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleShortcut);
+    return () => {
+      window.removeEventListener('keydown', handleShortcut);
+    };
+  });
+
   onDestroy(() => {
     clearInterval(timer);
     if (audio) {
@@ -163,7 +188,7 @@
   <link rel="icon" href="/logo-short.png" />
 </svelte:head>
 
-<Drawer.Root>
+<Drawer.Root open={drawerOpen}>
   <audio bind:this={audio} src="/clock-sound-tick.mp3"></audio>
   <div class="flex flex-col items-center justify-center h-full">
     {#key currentModeIndex}

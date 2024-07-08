@@ -1,3 +1,15 @@
-// since there's no dynamic data here, we can prerender
-// it so that it gets served as a static asset in production
-// export const prerender = true;
+import type { Load } from '@sveltejs/kit';
+import { settings } from '$lib/store';
+import { browser } from '$app/environment';
+
+export const load: Load = async () => {
+  if (browser) {
+    // Ensure settings are loaded from localStorage on page load
+    const storedSettings = localStorage.getItem('settings');
+    if (storedSettings) {
+      settings.set(JSON.parse(storedSettings));
+    }
+  }
+
+  return {};
+};

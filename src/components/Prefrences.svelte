@@ -14,6 +14,10 @@
   $: if ($settings) {
     settings.set($settings);
   }
+
+  $: settings.subscribe((value: Settings) => {
+    localStorage.setItem('settings', JSON.stringify(value));
+  });
 </script>
 
 <div

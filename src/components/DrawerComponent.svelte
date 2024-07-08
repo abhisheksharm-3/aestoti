@@ -9,6 +9,7 @@
   import * as Tabs from "$lib/components/ui/tabs";
   import ComingSoon from "./ComingSoon.svelte";
   import Prefrences from "./Prefrences.svelte";
+  import Shortcuts from "./Shortcuts.svelte";
 </script>
 
 <Drawer.Content>
@@ -29,7 +30,7 @@
       <Prefrences />
     </Tabs.Content>
     <Tabs.Content value="shortcuts">
-      <ComingSoon />
+      <Shortcuts />
     </Tabs.Content>
   </Tabs.Root>
   <Drawer.Footer  class="flex items-center justify-self-center">
