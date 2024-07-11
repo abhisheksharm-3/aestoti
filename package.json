@@ -25,6 +25,7 @@
   },
   "type": "module",
   "dependencies": {
+    "appwrite": "^15.0.0",
     "bits-ui": "^0.21.12",
     "clsx": "^2.1.1",
     "cmdk-sv": "^0.0.17",

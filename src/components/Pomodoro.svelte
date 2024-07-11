@@ -32,7 +32,7 @@
   let playPauseIcon = RiPlayLargeFill;
   let audio: HTMLAudioElement;
   let drawerOpen = false;
-  let modeStartTime: number;
+  let modeStartTime: number | undefined;
 
   // Box the currentTime to force reactivity
   let currentTimeBox = { value: 0 };
@@ -116,14 +116,16 @@
       audio.currentTime = 0;
     }
   }
+
   function calculateTimeSpent(): number {
-  const endTime = Date.now();
-  return Math.floor((endTime - modeStartTime) / 1000); // Convert to seconds
-}
-//TODO: Fix infinte skip glitch
+    if (!modeStartTime) return 0;
+    const endTime = Date.now();
+    return Math.floor((endTime - modeStartTime) / 1000); // Convert to seconds
+  }
+
   function moveToNextMode() {
     const previousModeIndex = currentModeIndex;
-    const actualTimeSpent = calculateTimeSpent();
+    const actualTimeSpent = isTimerRunning ? calculateTimeSpent() : 0;
 
     if (currentModeIndex === 0) {
       focusSessions++;
@@ -142,16 +144,16 @@
     if ($settings.notification) {
       const previousMode = modes[previousModeIndex].title;
       const nextMode = modes[currentModeIndex].title;
-      const timeSpent = formatTime(actualTimeSpent);
+      const timeSpent = formatTime(actualTimeSpent) || "00:00";
       const timeSpentString = `${timeSpent.minutes}:${timeSpent.seconds}`;
 
       toast.success("Great job! Time's up!", {
-  description: `You've completed ${timeSpentString} minutes of ${previousMode}. Ready for a ${nextMode} session?`,
-  action: {
-    label: `Skip ${nextMode}`,
-    onClick: (event: MouseEvent) => skipMode(),
-  },
-});
+        description: `You've completed ${timeSpentString} minutes of ${previousMode}. Ready for a ${nextMode} session?`,
+        action: {
+          label: `Skip ${nextMode}`,
+          onClick: (event: MouseEvent) => skipMode(),
+        },
+      });
     }
 
     if ($settings.auto_time) {
@@ -224,10 +226,7 @@
 </script>
 
 <svelte:head>
-  <title
-    >{modes[currentModeIndex].title} for {formatTime(currentTimeBox.value)
-      .minutes} : {formatTime(currentTimeBox.value).seconds} @Aestoti</title
-  >
+  <title>{modes[currentModeIndex].title} for {formatTime(currentTimeBox.value).minutes} : {formatTime(currentTimeBox.value).seconds} @Aestoti</title>
   <link rel="icon" href="/logo-short.png" />
 </svelte:head>
 
