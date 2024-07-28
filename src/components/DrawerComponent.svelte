@@ -10,6 +10,18 @@
   import ComingSoon from "./ComingSoon.svelte";
   import Prefrences from "./Prefrences.svelte";
   import Shortcuts from "./Shortcuts.svelte";
+  import PomodoroStats from "./PomodoroStats.svelte";
+
+  const mockSessions = [
+    { duration: 25, startTime: '2024-07-28T09:00:00Z' },
+    { duration: 30, startTime: '2024-07-28T10:00:00Z' },
+    { duration: 20, startTime: '2024-07-28T11:00:00Z' },
+    { duration: 25, startTime: '2024-07-27T14:00:00Z' },
+    { duration: 35, startTime: '2024-07-27T16:00:00Z' },
+    { duration: 40, startTime: '2024-07-26T10:00:00Z' },
+    { duration: 25, startTime: '2024-07-26T13:00:00Z' },
+    { duration: 30, startTime: '2024-07-25T11:00:00Z' },
+  ];
 </script>
 
 <Drawer.Content>
@@ -24,7 +36,7 @@
       <Tabs.Trigger class="flex items-center gap-2" value="shortcuts"><RiKeyboardBoxFill /> Shortcuts</Tabs.Trigger>
     </Tabs.List>
     <Tabs.Content value="stats">
-      <ComingSoon />
+      <PomodoroStats sessions={mockSessions} />
     </Tabs.Content>
     <Tabs.Content value="prefrences">
       <Prefrences />

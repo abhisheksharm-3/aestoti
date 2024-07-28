@@ -29,6 +29,8 @@
     "bits-ui": "^0.21.12",
     "clsx": "^2.1.1",
     "cmdk-sv": "^0.0.17",
+    "force": "^0.0.3",
+    "lucide-svelte": "^0.417.0",
     "mode-watcher": "^0.3.1",
     "svelte-radix": "^1.1.0",
     "svelte-remixicon": "^2.5.0",
