@@ -11,7 +11,7 @@
   "devDependencies": {
     "@fontsource/fira-mono": "^4.5.10",
     "@neoconfetti/svelte": "^1.0.0",
-    "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/adapter-auto": "^3.2.2",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "autoprefixer": "^10.4.19",
@@ -26,17 +26,20 @@
   "type": "module",
   "dependencies": {
     "appwrite": "^15.0.0",
-    "bits-ui": "^0.21.12",
+    "bits-ui": "^0.21.13",
     "clsx": "^2.1.1",
     "cmdk-sv": "^0.0.17",
     "force": "^0.0.3",
+    "formsnap": "^1.0.1",
     "lucide-svelte": "^0.417.0",
     "mode-watcher": "^0.3.1",
     "svelte-radix": "^1.1.0",
     "svelte-remixicon": "^2.5.0",
     "svelte-sonner": "^0.3.25",
+    "sveltekit-superforms": "^2.16.1",
     "tailwind-merge": "^2.3.0",
     "tailwind-variants": "^0.2.1",
-    "vaul-svelte": "^0.3.2"
+    "vaul-svelte": "^0.3.2",
+    "zod": "^3.23.8"
   }
 }

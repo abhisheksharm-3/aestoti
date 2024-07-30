@@ -1,4 +1,5 @@
-<script>
+<script lang="ts">
+  import { onMount } from 'svelte';
   import {
     RiBarChart2Line,
     RiKeyboardBoxFill,
@@ -11,17 +12,54 @@
   import Prefrences from "./Prefrences.svelte";
   import Shortcuts from "./Shortcuts.svelte";
   import PomodoroStats from "./PomodoroStats.svelte";
+  import AuthForm from "./AuthComponent.svelte";
+  import NoSessionsMessage from "./NoSessionsMessage.svelte";
+  import { login, logout, getSessionData, checkLoggedInUser, type Session } from '$lib/appwrite';
+  import type { Models } from 'appwrite';
 
-  const mockSessions = [
-    { duration: 25, startTime: '2024-07-28T09:00:00Z' },
-    { duration: 30, startTime: '2024-07-28T10:00:00Z' },
-    { duration: 20, startTime: '2024-07-28T11:00:00Z' },
-    { duration: 25, startTime: '2024-07-27T14:00:00Z' },
-    { duration: 35, startTime: '2024-07-27T16:00:00Z' },
-    { duration: 40, startTime: '2024-07-26T10:00:00Z' },
-    { duration: 25, startTime: '2024-07-26T13:00:00Z' },
-    { duration: 30, startTime: '2024-07-25T11:00:00Z' },
-  ];
+  let isLoggedIn = false;
+  let userId: string | null = null;
+  let sessions: Session[] = [];
+  let activeTab: string = "stats";
+
+  onMount(async () => {
+    const loggedInUser = await checkLoggedInUser();
+    if (loggedInUser) {
+      isLoggedIn = true;
+      userId = loggedInUser.$id; // Use $id instead of id
+      await fetchSessions();
+    }
+  });
+
+  async function handleLogin(event: CustomEvent<{ email: string, password: string }>) {
+    const { email, password } = event.detail;
+    try {
+      userId = await login(email, password);
+      isLoggedIn = true;
+      await fetchSessions();
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Handle login error (e.g., show error message)
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      await logout();
+      isLoggedIn = false;
+      userId = null;
+      sessions = [];
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Handle logout error
+    }
+  }
+
+  async function fetchSessions() {
+    if (userId) {
+      sessions = await getSessionData(userId);
+    }
+  }
 </script>
 
 <Drawer.Content>
@@ -29,23 +67,42 @@
     <Drawer.Title>Control Center</Drawer.Title>
     <Drawer.Description>Manage Your Pomodoro</Drawer.Description>
   </Drawer.Header>
-  <Tabs.Root value="prefrences" class="flex items-center justify-center flex-col gap-10">
-    <Tabs.List class=" w-max flex gap-6">
-      <Tabs.Trigger class="flex items-center gap-2" value="stats"> <RiBarChart2Line /> Statistics</Tabs.Trigger>
-      <Tabs.Trigger class="flex items-center gap-2" value="prefrences"><RiSettings3Fill /> Prefrences</Tabs.Trigger>
-      <Tabs.Trigger class="flex items-center gap-2" value="shortcuts"><RiKeyboardBoxFill /> Shortcuts</Tabs.Trigger>
-    </Tabs.List>
-    <Tabs.Content value="stats">
-      <PomodoroStats sessions={mockSessions} />
-    </Tabs.Content>
-    <Tabs.Content value="prefrences">
-      <Prefrences />
-    </Tabs.Content>
-    <Tabs.Content value="shortcuts">
-      <Shortcuts />
-    </Tabs.Content>
-  </Tabs.Root>
-  <Drawer.Footer  class="flex items-center justify-self-center">
-    <Drawer.Close class="border w-max px-4 py-2 rounded-3xl hover:bg-gray-400/10 ease-linear duration-300">Close</Drawer.Close>
+  
+  {#if isLoggedIn}
+    <Tabs.Root bind:value={activeTab} class="flex items-center justify-center flex-col gap-10">
+      <Tabs.List class="w-max flex gap-6">
+        <Tabs.Trigger class="flex items-center gap-2" value="stats">
+          <RiBarChart2Line /> Statistics
+        </Tabs.Trigger>
+        <Tabs.Trigger class="flex items-center gap-2" value="prefrences">
+          <RiSettings3Fill /> Preferences
+        </Tabs.Trigger>
+        <Tabs.Trigger class="flex items-center gap-2" value="shortcuts">
+          <RiKeyboardBoxFill /> Shortcuts
+        </Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="stats">
+        {#if sessions.length > 0}
+          <PomodoroStats {sessions} />
+        {:else}
+          <NoSessionsMessage />
+        {/if}
+      </Tabs.Content>
+      <Tabs.Content value="prefrences">
+        <Prefrences />
+      </Tabs.Content>
+      <Tabs.Content value="shortcuts">
+        <Shortcuts />
+      </Tabs.Content>
+    </Tabs.Root>
+    <Button on:click={handleLogout}>Logout</Button>
+  {:else}
+    <AuthForm on:login={handleLogin} />
+  {/if}
+  
+  <Drawer.Footer class="flex items-center justify-self-center">
+    <Drawer.Close class="border w-max px-4 py-2 rounded-3xl hover:bg-gray-400/10 ease-linear duration-300">
+      Close
+    </Drawer.Close>
   </Drawer.Footer>
 </Drawer.Content>

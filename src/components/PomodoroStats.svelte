@@ -5,8 +5,9 @@
   import { Button } from "$lib/components/ui/button";
   import { ArrowUpRight } from "lucide-svelte";
   import StatCard from './StatCard.svelte';
+  import type { Session } from "$lib/appwrite";
 
-  export let sessions: Array<{ duration: number, startTime: string }> = [];
+  export let sessions: Session[] = [];
 
   // Calculate statistics
   $: totalSessions = sessions.length;
