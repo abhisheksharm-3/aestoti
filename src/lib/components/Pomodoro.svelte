@@ -36,6 +36,7 @@
 
   // Box the currentTime to force reactivity
   let currentTimeBox = { value: 0 };
+  let lastPausedTime = 0;
 
   $: modes = [
     {
@@ -58,14 +59,16 @@
   $: updateCurrentTime(modes[currentModeIndex].duration);
 
   function updateCurrentTime(newDuration: number): void {
-    if (isTimerRunning) {
-      const oldDuration = modes[currentModeIndex].duration;
-      const progress = 1 - currentTimeBox.value / oldDuration;
-      currentTimeBox.value = Math.round(newDuration * (1 - progress));
-    } else {
-      currentTimeBox.value = newDuration;
-    }
+  if (isTimerRunning) {
+    // Do nothing if the timer is running
+  } else if (lastPausedTime > 0) {
+    // Use the last paused time if available
+    currentTimeBox.value = lastPausedTime;
+  } else {
+    // Set to the new duration if the timer hasn't started yet
+    currentTimeBox.value = newDuration;
   }
+}
 
   const [send, receive] = crossfade({
     duration: 500,
@@ -126,6 +129,7 @@
   function moveToNextMode() {
     const previousModeIndex = currentModeIndex;
     const actualTimeSpent = isTimerRunning ? calculateTimeSpent() : 0;
+    lastPausedTime = 0;
 
     if (currentModeIndex === 0) {
       focusSessions++;
@@ -165,29 +169,32 @@
   }
 
   function toggleTimer() {
-    if (isTimerRunning) {
-      clearInterval(timer);
-      if ($settings.sound) audio.pause();
-      isTimerRunning = false;
-      playPauseIcon = RiPlayLargeFill;
-    } else {
-      startTimer();
-      isTimerRunning = true;
-      playPauseIcon = RiPauseLargeFill;
-    }
+  if (isTimerRunning) {
+    clearInterval(timer);
+    if ($settings.sound) audio.pause();
+    isTimerRunning = false;
+    playPauseIcon = RiPlayLargeFill;
+    lastPausedTime = currentTimeBox.value; // Store the current time when pausing
+  } else {
+    startTimer();
+    isTimerRunning = true;
+    playPauseIcon = RiPauseLargeFill;
   }
+}
+
+function restartMode() {
+  clearInterval(timer);
+  lastPausedTime = 0; // Reset the last paused time
+  updateCurrentTime(modes[currentModeIndex].duration);
+  if (isTimerRunning) {
+    startTimer();
+  }
+}
 
   function skipMode() {
     clearInterval(timer);
+    lastPausedTime = 0;
     moveToNextMode();
-    if (isTimerRunning) {
-      startTimer();
-    }
-  }
-
-  function restartMode() {
-    clearInterval(timer);
-    updateCurrentTime(modes[currentModeIndex].duration);
     if (isTimerRunning) {
       startTimer();
     }
