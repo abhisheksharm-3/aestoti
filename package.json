@@ -23,11 +23,13 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"appwrite": "^15.0.0",
 		"bits-ui": "^0.21.13",
 		"clsx": "^2.1.1",
 		"cmdk-sv": "^0.0.18",
 		"lucide-svelte": "^0.417.0",
 		"mode-watcher": "^0.4.1",
+		"node-appwrite": "^13.0.0",
 		"svelte-remixicon": "^2.5.0",
 		"svelte-sonner": "^0.3.27",
 		"tailwind-merge": "^2.4.0",
