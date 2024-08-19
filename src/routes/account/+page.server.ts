@@ -1,35 +1,29 @@
-// src/routes/account/+page.server.ts
+// src/routes/account/+page.server.js
 
 import { SESSION_COOKIE, createSessionClient } from "$lib/appwrite.server";
-import { redirect, type Actions, fail } from "@sveltejs/kit";
-import type { PageServerLoad } from './$types';
+import { redirect } from "@sveltejs/kit";
 
-export const load: PageServerLoad = async ({ locals, cookies }) => {
+export async function load({ locals }) {
   // Logged out users can't access this page.
-  if (!locals.user) {
-    throw redirect(303, "/auth");
-  }
+  if (!locals.user) redirect(301, "/signup");
 
   // Pass the stored user local to the page.
   return {
     user: locals.user,
   };
-};
+}
 
 // Define our log out endpoint/server action.
-export const actions: Actions = {
-  logout: async ({ cookies }) => {
-    try {
-      const session = cookies.get(SESSION_COOKIE);
-      if (session) {
-        const { account } = createSessionClient(session);
-        await account.deleteSession("current");
-      }
-      cookies.delete(SESSION_COOKIE, { path: "/" });
-      throw redirect(303, "/auth");
-    } catch (error) {
-      console.error('Logout error:', error);
-      return fail(400, { success: false, error: 'Logout failed' });
-    }
+export const actions = {
+  default: async (event) => {
+    // Create the Appwrite client.
+    const { account } = createSessionClient(event);
+
+    // Delete the session on Appwrite, and delete the session cookie.
+    await account.deleteSession("current");
+    event.cookies.delete(SESSION_COOKIE, { path: "/" });
+
+    // Redirect to the sign up page.
+    redirect(301, "/signup");
   },
 };

@@ -1,17 +1,14 @@
 import { createSessionClient } from '$lib/appwrite.server';
-import { SESSION_COOKIE } from '$lib/appwrite.server';
 
 export async function handle({ event, resolve }) {
-  const session = event.cookies.get(SESSION_COOKIE);
+  try {
+    // Use our helper function to create the Appwrite client.
+    const { account } = createSessionClient(event);
+    // Store the current logged in user in locals,
+    // for easy access in our other routes.
+    event.locals.user = await account.get();
+  } catch {}
   
-  if (session) {
-    try {
-      const { account } = createSessionClient(session);
-      event.locals.user = await account.get();
-    } catch {
-      event.cookies.delete(SESSION_COOKIE, { path: '/' });
-    }
-  }
-  
+  // Continue with the request.
   return resolve(event);
 }
