@@ -7,16 +7,25 @@
     RiPlayLargeFill,
     RiPauseLargeFill,
     RiSkipForwardFill,
-    RiTreeLine
+    RiTreeLine,
+    RiFullscreenFill
   } from 'svelte-remixicon';
   import * as Drawer from '$lib/components/ui/drawer';
   import Button from '$lib/components/ui/button/button.svelte';
   import DrawerComponent from './DrawerComponent.svelte';
+  import DailyGoal from './DailyGoal.svelte';
+  import FullscreenMode from './FullscreenMode.svelte';
   import { crossfade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { settings } from '$lib/store';
   import { timer, formattedTime } from '$lib/timer';
   import { sessions } from '$lib/analytics';
+  import { tasks, activeTaskId } from '$lib/tasks';
+  import { goals } from '$lib/goals';
+  import { sounds } from '$lib/sounds';
+  import { presets } from '$lib/presets';
+  import { themes } from '$lib/themes';
+  import { shortcuts } from '$lib/shortcuts';
   import { notifications } from '$lib/notifications';
   import { toast } from 'svelte-sonner';
 
@@ -32,26 +41,27 @@
     longBreak: 'Long Break'
   } as const;
 
-  let audio: HTMLAudioElement;
   let drawerOpen = false;
+  let isFullscreen = false;
   let previousMode: keyof typeof MODE_TITLES = 'focus';
 
   $: currentIcon = MODE_ICONS[$timer.currentMode];
   $: currentTitle = MODE_TITLES[$timer.currentMode];
   $: playPauseIcon = $timer.isRunning ? RiPauseLargeFill : RiPlayLargeFill;
+  $: activeTask = $tasks.find(t => t.id === $activeTaskId);
+  $: themeColor = themes.getCurrent();
 
-  $: if ($timer.isRunning && $timer.currentMode === 'focus' && $settings.hasSound) {
-    audio?.play().catch(() => {});
-    if (audio) audio.loop = true;
-  } else if (audio) {
-    audio.pause();
-    audio.currentTime = 0;
+  $: if ($timer.isRunning && $timer.currentMode === 'focus') {
+    sounds.playAmbient();
+  } else {
+    sounds.stopAmbient();
   }
 
   $: {
     if ($timer.currentMode !== previousMode) {
-      if ($settings.hasNotification && previousMode !== $timer.currentMode) {
+      if ($settings.hasNotification) {
         showCompletionNotifications(previousMode, $timer.currentMode);
+        sounds.playNotification();
       }
       previousMode = $timer.currentMode;
     }
@@ -94,15 +104,21 @@
   }
 
   function handleKeydown(event: KeyboardEvent): void {
-    if (event.altKey && event.key === 's') {
+    if (shortcuts.matchesEvent(event, 'openSettings')) {
       event.preventDefault();
       drawerOpen = !drawerOpen;
-    } else if (event.key === ' ') {
+    } else if (shortcuts.matchesEvent(event, 'toggleTimer')) {
       event.preventDefault();
       handleToggle();
-    } else if (event.altKey && event.key === 'n') {
+    } else if (shortcuts.matchesEvent(event, 'skipMode')) {
       event.preventDefault();
       handleSkip();
+    } else if (shortcuts.matchesEvent(event, 'restartMode')) {
+      event.preventDefault();
+      timer.restart();
+    } else if (shortcuts.matchesEvent(event, 'toggleFullscreen')) {
+      event.preventDefault();
+      isFullscreen = !isFullscreen;
     }
   }
 
@@ -116,12 +132,19 @@
     settings.initialize();
     timer.initialize();
     sessions.initialize();
+    tasks.initialize();
+    goals.initialize();
+    sounds.initialize();
+    presets.initialize();
+    themes.initialize();
+    shortcuts.initialize();
     requestNotificationPermission();
     window.addEventListener('keydown', handleKeydown);
   });
 
   onDestroy(() => {
     timer.destroy();
+    sounds.stopAmbient();
     window.removeEventListener('keydown', handleKeydown);
   });
 </script>
@@ -129,48 +152,85 @@
 <svelte:head>
   <title>{currentTitle} - {$formattedTime.minutes}:{$formattedTime.seconds} | Aestoti</title>
   <link rel="icon" href="/logo-short.png" />
+  <style>
+    :root {
+      --btn-bg: var(--theme-primary, #FF4C4C);
+      --btn-bg-light: color-mix(in srgb, var(--theme-primary, #FF4C4C) 20%, transparent);
+      --btn-bg-hover: color-mix(in srgb, var(--theme-primary, #FF4C4C) 70%, transparent);
+    }
+  </style>
 </svelte:head>
 
-<Drawer.Root bind:open={drawerOpen}>
-  <audio bind:this={audio} src="/clock-sound-tick.mp3"></audio>
-  <div class="flex flex-col items-center justify-center h-full">
-    {#key $timer.currentMode}
-      <div
-        class="flex items-center text-xl border-white bg-[#FF4C4C26] font-bold mb-8 border px-4 py-1 rounded-full lg:mr-2"
-        in:receive={{ key: $timer.currentMode }}
-        out:send={{ key: $timer.currentMode }}
-      >
-        <svelte:component this={currentIcon} class="mr-2" />
-        {currentTitle}
-      </div>
-    {/key}
-    <div
-      class={`flex flex-col items-center ml-2 text-9xl mb-12 tracking-widest ${$timer.isRunning ? 'font-extrabold transition-all duration-300' : 'font-light transition-all duration-300'}`}
-    >
-      <div>{$formattedTime.minutes}</div>
-      <div>{$formattedTime.seconds}</div>
-    </div>
-    <div class="flex space-x-4 items-center">
-      <Drawer.Trigger>
-        <Button
-          class="bg-[#FF4C4C26] text-[#471515] dark:text-white rounded-2xl p-6 hover:bg-red-500/70 dark:hover:bg-red-950 text-2xl font-bold transition-transform duration-300 transform hover:scale-110"
+{#if isFullscreen}
+  <FullscreenMode onExit={() => isFullscreen = false} />
+{:else}
+  <Drawer.Root bind:open={drawerOpen}>
+    <div class="flex flex-col items-center justify-center h-full gap-3">
+      <DailyGoal />
+      
+      <!-- Active Task Display -->
+      {#if activeTask}
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 text-sm">
+          <span class="text-muted-foreground">Working on:</span>
+          <span class="font-medium">{activeTask.title}</span>
+          <span class="text-xs bg-primary/20 px-2 py-0.5 rounded-full">
+            🍅 {activeTask.focusSessionsSpent}
+          </span>
+        </div>
+      {/if}
+      
+      {#key $timer.currentMode}
+        <div
+          class="flex items-center text-xl font-bold mb-2 px-4 py-1 rounded-full border"
+          style="background: var(--btn-bg-light); border-color: var(--btn-bg)"
+          in:receive={{ key: $timer.currentMode }}
+          out:send={{ key: $timer.currentMode }}
         >
-          <RiMoreFill />
+          <svelte:component this={currentIcon} class="mr-2" />
+          {currentTitle}
+        </div>
+      {/key}
+      
+      <div
+        class="flex flex-col items-center ml-2 text-9xl mb-6 tracking-widest {$timer.isRunning ? 'font-extrabold' : 'font-light'} transition-all duration-300"
+      >
+        <div>{$formattedTime.minutes}</div>
+        <div>{$formattedTime.seconds}</div>
+      </div>
+      
+      <div class="flex space-x-4 items-center">
+        <Button
+          class="rounded-2xl p-4 text-xl transition-transform duration-300 transform hover:scale-110"
+          style="background: var(--btn-bg-light)"
+          on:click={() => isFullscreen = true}
+          title="Fullscreen (Alt+F)"
+        >
+          <RiFullscreenFill />
         </Button>
-      </Drawer.Trigger>
-      <Button
-        class="bg-[#FF4C4Cb5] text-[#471515] dark:text-white rounded-3xl p-8 hover:bg-red-700 text-3xl transition-transform duration-300 transform hover:scale-110"
-        on:click={handleToggle}
-      >
-        <svelte:component this={playPauseIcon} />
-      </Button>
-      <Button
-        class="bg-[#FF4C4C26] text-2xl font-bold text-[#471515] dark:text-white rounded-2xl p-6 hover:bg-red-500/70 dark:hover:bg-red-950 transition-transform duration-300 transform hover:scale-110"
-        on:click={handleSkip}
-      >
-        <RiSkipForwardFill />
-      </Button>
+        <Drawer.Trigger>
+          <Button
+            class="rounded-2xl p-6 text-2xl font-bold transition-transform duration-300 transform hover:scale-110"
+            style="background: var(--btn-bg-light)"
+          >
+            <RiMoreFill />
+          </Button>
+        </Drawer.Trigger>
+        <Button
+          class="rounded-3xl p-8 text-3xl transition-transform duration-300 transform hover:scale-110"
+          style="background: var(--btn-bg)"
+          on:click={handleToggle}
+        >
+          <svelte:component this={playPauseIcon} />
+        </Button>
+        <Button
+          class="rounded-2xl p-6 text-2xl font-bold transition-transform duration-300 transform hover:scale-110"
+          style="background: var(--btn-bg-light)"
+          on:click={handleSkip}
+        >
+          <RiSkipForwardFill />
+        </Button>
+      </div>
     </div>
-  </div>
-  <DrawerComponent />
-</Drawer.Root>
+    <DrawerComponent />
+  </Drawer.Root>
+{/if}

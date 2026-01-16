@@ -3,6 +3,7 @@ import { browser } from '$app/environment';
 import type { PomodoroModeType, TimerStateType } from './types';
 import { settings } from './store';
 import { sessions } from './analytics';
+import { tasks, activeTaskId } from './tasks';
 
 /**
  * Creates the timer store with all timer logic
@@ -124,6 +125,14 @@ function createTimerStore() {
 
             const current = get(state);
             recordCompletedSession(current.currentMode, true);
+
+            // Increment active task session count if focus completed
+            if (current.currentMode === 'focus') {
+                const taskId = get(activeTaskId);
+                if (taskId) {
+                    tasks.incrementSession(taskId);
+                }
+            }
 
             const newFocusCount = current.currentMode === 'focus'
                 ? current.focusSessionCount + 1
