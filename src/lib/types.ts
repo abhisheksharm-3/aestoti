@@ -1,24 +1,16 @@
-/**
- * Settings configuration for the Pomodoro timer
- */
 export type SettingsType = {
   isAutoTime: boolean;
   hasSound: boolean;
   hasNotification: boolean;
+  hasBreakPrompts: boolean;
   focusLength: number;
   longBreakInterval: number;
   shortLength: number;
   longLength: number;
 };
 
-/**
- * Pomodoro timer mode types
- */
 export type PomodoroModeType = 'focus' | 'shortBreak' | 'longBreak';
 
-/**
- * A completed Pomodoro session record
- */
 export type PomodoroSessionType = {
   id: string;
   mode: PomodoroModeType;
@@ -26,11 +18,9 @@ export type PomodoroSessionType = {
   endTime: string;
   durationSeconds: number;
   isCompleted: boolean;
+  note?: string;
 };
 
-/**
- * Timer state representation
- */
 export type TimerStateType = {
   currentMode: PomodoroModeType;
   remainingSeconds: number;
@@ -38,9 +28,6 @@ export type TimerStateType = {
   focusSessionCount: number;
 };
 
-/**
- * Analytics summary statistics
- */
 export type AnalyticsSummaryType = {
   totalSessions: number;
   totalFocusMinutes: number;
@@ -52,9 +39,6 @@ export type AnalyticsSummaryType = {
   currentStreak: number;
 };
 
-/**
- * Task item for to-do list
- */
 export type TaskType = {
   id: string;
   title: string;
@@ -64,17 +48,18 @@ export type TaskType = {
   focusSessionsSpent: number;
 };
 
-/**
- * Daily goal configuration
- */
 export type DailyGoalType = {
   targetSessions: number;
   isEnabled: boolean;
 };
 
-/**
- * Timer preset configuration
- */
+export type DailyProgressType = {
+  completed: number;
+  target: number;
+  percentage: number;
+  isGoalMet: boolean;
+};
+
 export type TimerPresetType = {
   id: string;
   name: string;
@@ -84,9 +69,6 @@ export type TimerPresetType = {
   longBreakInterval: number;
 };
 
-/**
- * Theme configuration
- */
 export type ThemeType = {
   id: string;
   name: string;
@@ -95,9 +77,13 @@ export type ThemeType = {
   accent: string;
 };
 
-/**
- * Keyboard shortcut binding
- */
+export type ShortcutActionType =
+  | 'toggleTimer'
+  | 'skipMode'
+  | 'restartMode'
+  | 'openSettings'
+  | 'toggleFullscreen';
+
 export type ShortcutType = {
   action: ShortcutActionType;
   key: string;
@@ -106,19 +92,6 @@ export type ShortcutType = {
   hasShift: boolean;
 };
 
-/**
- * Available shortcut actions
- */
-export type ShortcutActionType =
-  | 'toggleTimer'
-  | 'skipMode'
-  | 'restartMode'
-  | 'openSettings'
-  | 'toggleFullscreen';
-
-/**
- * Sound preset for ambient audio
- */
 export type SoundPresetType = {
   id: string;
   name: string;
@@ -126,20 +99,21 @@ export type SoundPresetType = {
   src: string;
 };
 
-/**
- * Hourly productivity data
- */
 export type HourlyProductivityType = {
   hour: number;
   sessionCount: number;
   totalMinutes: number;
 };
 
-/**
- * Daily session data for heatmap
- */
 export type DailySessionDataType = {
   date: string;
   sessionCount: number;
   totalMinutes: number;
 };
+
+export type SessionCompleteCallbackType = (
+  mode: PomodoroModeType,
+  startTime: Date,
+  endTime: Date,
+  isCompleted: boolean
+) => void;
