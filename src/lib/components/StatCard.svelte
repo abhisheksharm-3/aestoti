@@ -1,11 +1,7 @@
 <script lang="ts">
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
-  /** @type {string} Title displayed in the card header */
-  export let title: string;
-  
-  /** @type {string} Value displayed as the main statistic */
-  export let value: string;
+  let { title, value }: { title: string; value: string } = $props();
 </script>
 
 <Card>
