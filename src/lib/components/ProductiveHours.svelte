@@ -1,10 +1,14 @@
 <script lang="ts">
-  import { sessions } from '$lib/analytics';
-  import { calculateHourlyProductivity, getMostProductiveHour, formatHour } from '$lib/export';
+  import { analytics } from '$lib/stores/analytics.svelte';
+  import {
+    calculateHourlyProductivity,
+    getMostProductiveHour,
+    formatHour
+  } from '$lib/utils/analytics-utils';
 
-  $: hourlyData = calculateHourlyProductivity($sessions);
-  $: maxMinutes = Math.max(...hourlyData.map(h => h.totalMinutes), 1);
-  $: bestHour = getMostProductiveHour(hourlyData);
+  let hourlyData = $derived(calculateHourlyProductivity(analytics.sessions));
+  let maxMinutes = $derived(Math.max(...hourlyData.map(h => h.totalMinutes), 1));
+  let bestHour = $derived(getMostProductiveHour(hourlyData));
 </script>
 
 <div class="space-y-3">

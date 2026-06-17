@@ -1,44 +1,36 @@
 <script lang="ts">
-  import { sessions } from '$lib/analytics';
+  import { analytics } from '$lib/stores/analytics.svelte';
 
-  const WEEKS = 16; // Show last 16 weeks ~ 4 months
-  
-  $: dailyMap = buildDailyMap($sessions);
-  $: weeks = buildWeeks(dailyMap);
-  $: totalSessions = $sessions.filter(s => s.mode === 'focus').length;
+  const WEEKS = 16;
+  const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
-  function buildDailyMap(sessionsList: typeof $sessions): Map<string, number> {
+  let dailyMap = $derived(buildDailyMap(analytics.sessions));
+  let weeks = $derived(buildWeeks(dailyMap));
+  let totalSessions = $derived(analytics.sessions.filter(s => s.mode === 'focus').length);
+
+  function buildDailyMap(sessionsList: typeof analytics.sessions): Map<string, number> {
     const map = new Map<string, number>();
     sessionsList
       .filter(s => s.mode === 'focus')
       .forEach(s => {
         const date = s.startTime.split('T')[0];
-        map.set(date, (map.get(date) || 0) + 1);
+        map.set(date, (map.get(date) ?? 0) + 1);
       });
     return map;
   }
 
-  function buildWeeks(dailyMap: Map<string, number>): { date: string; count: number }[][] {
+  function buildWeeks(map: Map<string, number>): { date: string; count: number }[][] {
     const result: { date: string; count: number }[][] = [];
-    // Align to start of last 16 weeks, ensuring we end on "today" or this week
-    const today = new Date();
-    // Find the Sunday of the current week (end point)
-    const endOfWeek = new Date(today);
-    // actually standard heatmap usually ends Today.
-    // Let's go back WEEKS * 7 days
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() - (WEEKS * 7) + 1);
-    
-    // Adjust start date to previous Sunday to keep alignement? 
-    // Actually lets just iterate weeks.
-    
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - WEEKS * 7 + 1);
+
     for (let week = 0; week < WEEKS; week++) {
       const weekData: { date: string; count: number }[] = [];
       for (let day = 0; day < 7; day++) {
         const date = new Date(startDate);
-        date.setDate(startDate.getDate() + (week * 7) + day);
+        date.setDate(startDate.getDate() + week * 7 + day);
         const dateStr = date.toISOString().split('T')[0];
-        weekData.push({ date: dateStr, count: dailyMap.get(dateStr) || 0 });
+        weekData.push({ date: dateStr, count: map.get(dateStr) ?? 0 });
       }
       result.push(weekData);
     }
@@ -54,10 +46,12 @@
   }
 
   function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
   }
-
-  const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 </script>
 
 <div class="flex flex-col gap-4 p-4 rounded-xl border bg-card/50">
@@ -67,16 +61,14 @@
       <p class="text-xs text-muted-foreground">{totalSessions} sessions recorded</p>
     </div>
   </div>
-  
+
   <div class="flex gap-2">
-    <!-- Day Labels Column -->
     <div class="flex flex-col gap-1 pt-0.5">
       {#each DAY_LABELS as label}
         <div class="h-3 text-[10px] text-muted-foreground leading-3 text-right w-6">{label}</div>
       {/each}
     </div>
 
-    <!-- Heatmap Grid -->
     <div class="flex gap-1 flex-1 overflow-x-auto pb-2">
       {#each weeks as week}
         <div class="flex flex-col gap-1 min-w-[12px]">
@@ -90,7 +82,7 @@
       {/each}
     </div>
   </div>
-  
+
   <div class="flex items-center gap-2 text-xs text-muted-foreground">
     <span>Less</span>
     <div class="flex gap-1">
