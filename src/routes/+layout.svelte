@@ -8,8 +8,10 @@
 </script>
 
 <div class="h-screen lg:px-10">
-  <nav class="p-8 flex items-center justify-center">
-    <img src="/logo.png" alt="logo" class="w-[60%] lg:w-[15%]" />
+  <nav class="flex items-center justify-center p-8">
+    <a href="/" class="font-display text-4xl italic leading-none tracking-tight text-foreground">
+      aestoti<span class="text-primary">.</span>
+    </a>
   </nav>
   <ModeWatcher />
   <Toaster />

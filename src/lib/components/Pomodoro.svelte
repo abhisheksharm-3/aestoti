@@ -14,7 +14,6 @@
   import { cubicOut } from 'svelte/easing';
   import { toast } from 'svelte-sonner';
   import * as Drawer from '$lib/components/ui/drawer';
-  import { Button } from '$lib/components/ui/button';
   import { timer, MODE_CONFIG } from '$lib/stores/timer.svelte';
   import { settings } from '$lib/stores/settings.svelte';
   import { analytics } from '$lib/stores/analytics.svelte';
@@ -157,46 +156,38 @@
 </script>
 
 <svelte:head>
-  <title>{currentTitle} - {timer.formattedTime.minutes}:{timer.formattedTime.seconds} | Aestoti</title>
+  <title>{timer.formattedTime.minutes}:{timer.formattedTime.seconds} · {currentTitle} | Aestoti</title>
   <link rel="icon" href="/logo-short.png" />
-  <style>
-    :root {
-      --btn-bg: var(--theme-primary, #FF4C4C);
-      --btn-bg-light: color-mix(in srgb, var(--theme-primary, #FF4C4C) 20%, transparent);
-      --btn-bg-hover: color-mix(in srgb, var(--theme-primary, #FF4C4C) 70%, transparent);
-    }
-  </style>
 </svelte:head>
 
 {#if isFullscreen}
   <FullscreenMode onExit={() => (isFullscreen = false)} />
 {:else}
   <Drawer.Root bind:open={isDrawerOpen}>
-    <div class="flex flex-col items-center justify-center h-full gap-3">
+    <div class="flex flex-col items-center justify-center h-full gap-5 px-4">
       <DailyGoal />
-
-      {#if activeTask}
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 text-sm">
-          <span class="text-muted-foreground">Working on:</span>
-          <span class="font-medium">{activeTask.title}</span>
-          <span class="text-xs bg-primary/20 px-2 py-0.5 rounded-full">
-            🍅 {activeTask.focusSessionsSpent}
-          </span>
-        </div>
-      {/if}
 
       {#key timer.state.currentMode}
         <div
-          class="flex items-center text-xl font-bold mb-2 px-4 py-1 rounded-full border"
-          style="background: var(--btn-bg-light); border-color: var(--btn-bg)"
+          class="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-sm font-medium tracking-wide"
           in:receive={{ key: timer.state.currentMode }}
           out:send={{ key: timer.state.currentMode }}
         >
-          {@const Icon = ModeIcon}
-          <Icon class="mr-2" />
-          {currentTitle}
+          <ModeIcon class="h-4 w-4 text-primary" />
+          <span>{currentTitle}</span>
         </div>
       {/key}
+
+      {#if activeTask}
+        <div class="flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1.5 text-sm text-muted-foreground">
+          <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
+          <span>Working on</span>
+          <span class="font-semibold text-foreground">{activeTask.title}</span>
+          {#if activeTask.focusSessionsSpent > 0}
+            <span class="text-xs">🍅 {activeTask.focusSessionsSpent}</span>
+          {/if}
+        </div>
+      {/if}
 
       {#if isBreakPromptVisible}
         <BreakPrompt
@@ -205,53 +196,66 @@
         />
       {/if}
 
-      <div class="relative flex items-center justify-center">
+      <div class="relative my-1 flex items-center justify-center">
+        {#if timer.state.isRunning}
+          <div class="pointer-events-none absolute h-40 w-40 rounded-full bg-primary/20 blur-3xl motion-safe:animate-pulse"></div>
+        {/if}
         <ProgressRing
           remainingSeconds={timer.state.remainingSeconds}
           totalSeconds={timer.totalSeconds}
-          size={240}
-          strokeWidth={5}
+          size={300}
+          strokeWidth={6}
         />
-        <div
-          class="absolute flex flex-col items-center ml-2 text-9xl tracking-widest {timer.state.isRunning ? 'font-extrabold' : 'font-light'} transition-all duration-300"
-        >
-          <div>{timer.formattedTime.minutes}</div>
-          <div>{timer.formattedTime.seconds}</div>
+        <div class="absolute flex flex-col items-center">
+          <div class="text-7xl font-medium leading-none tracking-tight tabular-nums sm:text-8xl">
+            {timer.formattedTime.minutes}:{timer.formattedTime.seconds}
+          </div>
+          <div class="mt-3 text-[11px] uppercase tracking-[0.3em] text-primary">{currentTitle}</div>
         </div>
       </div>
 
-      <div class="flex space-x-4 items-center">
-        <Button
-          class="rounded-2xl p-4 text-xl transition-transform duration-300 transform hover:scale-110"
-          style="background: var(--btn-bg-light)"
+      <div class="flex items-center gap-2" aria-hidden="true">
+        {#each Array.from({ length: settings.current.longBreakInterval }) as _, i}
+          <span
+            class="h-1.5 w-1.5 rounded-full transition-colors {i < timer.state.focusSessionCount % settings.current.longBreakInterval
+              ? 'bg-primary'
+              : 'bg-border'}"
+          ></span>
+        {/each}
+      </div>
+
+      <div class="mt-1 flex items-center gap-3">
+        <button
           onclick={() => (isFullscreen = true)}
+          class="grid h-12 w-12 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
+          aria-label="Enter fullscreen"
           title="Fullscreen (Alt+F)"
         >
-          <RiFullscreenFill />
-        </Button>
-        <Drawer.Trigger>
-          <Button
-            class="rounded-2xl p-6 text-2xl font-bold transition-transform duration-300 transform hover:scale-110"
-            style="background: var(--btn-bg-light)"
-          >
-            <RiMoreFill />
-          </Button>
-        </Drawer.Trigger>
-        <Button
-          class="rounded-3xl p-8 text-3xl transition-transform duration-300 transform hover:scale-110"
-          style="background: var(--btn-bg)"
+          <RiFullscreenFill class="h-5 w-5" />
+        </button>
+        <button
           onclick={handleToggleTimer}
+          class="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition hover:brightness-105 motion-safe:hover:scale-105"
+          aria-label={timer.state.isRunning ? 'Pause timer' : 'Start timer'}
         >
-          {@const Icon = PlayPauseIcon}
-          <Icon />
-        </Button>
-        <Button
-          class="rounded-2xl p-6 text-2xl font-bold transition-transform duration-300 transform hover:scale-110"
-          style="background: var(--btn-bg-light)"
+          <PlayPauseIcon class="h-7 w-7" />
+        </button>
+        <button
           onclick={() => timer.skip()}
+          class="grid h-12 w-12 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
+          aria-label="Skip to next mode"
+          title="Skip (Alt+N)"
         >
-          <RiSkipForwardFill />
-        </Button>
+          <RiSkipForwardFill class="h-5 w-5" />
+        </button>
+        <button
+          onclick={() => (isDrawerOpen = true)}
+          class="grid h-12 w-12 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
+          aria-label="Open control panel"
+          title="Settings (Alt+S)"
+        >
+          <RiMoreFill class="h-5 w-5" />
+        </button>
       </div>
     </div>
 

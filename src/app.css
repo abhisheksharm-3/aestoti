@@ -1,7 +1,7 @@
 /* Third-party @import must precede the Tailwind import: `@import "tailwindcss"`
    expands inline, and a font @import placed after it would no longer be first
    (CSS requires all @import to precede other statements). */
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme inline {
@@ -27,7 +27,8 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --font-sans: "Roboto Flex", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
 }
 
 /* Tailwind v4 dropped tailwind.config.js, which had defined the Roboto Flex font
@@ -42,49 +43,53 @@
 }
 
 @layer base {
+  /* Light "paper": warm off-white, ink tinted toward the brand red.
+     --primary/--ring are overwritten at runtime by the active theme (tomato by
+     default) so the whole instrument recolors. */
   :root {
-    --background: 0 100% 97%;
-    --foreground: 240 10% 3.9%;
-    --muted: 0 54% 18%;
-    --muted-foreground: 240 3.8% 70%;
-    --popover: 0 100% 97%;
-    --popover-foreground: 240 10% 3.9%;
-    --card: 0 100% 97%;
-    --card-foreground: 240 10% 3.9%;
-    --border: 240 5.9% 80%;
-    --input: 240 5.9% 80%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --background: 30 40% 97%;
+    --foreground: 24 18% 14%;
+    --muted: 30 22% 92%;
+    --muted-foreground: 28 8% 42%;
+    --popover: 30 50% 99%;
+    --popover-foreground: 24 18% 14%;
+    --card: 30 50% 99%;
+    --card-foreground: 24 18% 14%;
+    --border: 30 16% 86%;
+    --input: 30 16% 86%;
+    --primary: 0 100% 65%;
+    --primary-foreground: 30 40% 98%;
+    --secondary: 30 24% 93%;
+    --secondary-foreground: 24 18% 14%;
+    --accent: 30 24% 93%;
+    --accent-foreground: 24 18% 14%;
     --destructive: 0 72.2% 50.6%;
     --destructive-foreground: 0 0% 98%;
-    --ring: 240 10% 3.9%;
-    --radius: 0.5rem;
+    --ring: 0 100% 65%;
+    --radius: 0.75rem;
   }
 
+  /* Dark "instrument": warm near-black, every neutral tinted to the brand hue. */
   .dark {
-    --background: 0 53% 3%;
-    --foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --popover: 0 53% 3%;
-    --popover-foreground: 0 0% 98%;
-    --card: 0 53% 3%;
-    --card-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 20 14% 7%;
+    --foreground: 30 12% 96%;
+    --muted: 20 9% 16%;
+    --muted-foreground: 30 8% 65%;
+    --popover: 20 13% 10%;
+    --popover-foreground: 30 12% 96%;
+    --card: 20 13% 10%;
+    --card-foreground: 30 12% 96%;
+    --border: 20 9% 18%;
+    --input: 20 9% 18%;
+    --primary: 0 100% 65%;
+    --primary-foreground: 20 14% 8%;
+    --secondary: 20 9% 16%;
+    --secondary-foreground: 30 12% 96%;
+    --accent: 20 9% 16%;
+    --accent-foreground: 30 12% 96%;
+    --destructive: 0 62.8% 45%;
     --destructive-foreground: 0 0% 98%;
-    --ring: 240 4.9% 83.9%;
+    --ring: 0 100% 65%;
   }
 
   * { @apply border-border; }
