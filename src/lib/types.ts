@@ -117,3 +117,5 @@ export type SessionCompleteCallbackType = (
   endTime: Date,
   isCompleted: boolean
 ) => void;
+
+export type NotificationPermissionType = 'granted' | 'denied' | 'default';
