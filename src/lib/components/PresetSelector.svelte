@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { presets, DEFAULT_PRESETS } from '$lib/presets';
-  import { settings } from '$lib/store';
-  import { timer } from '$lib/timer';
+  import { presets, DEFAULT_PRESETS } from '$lib/stores/presets.svelte';
+  import { settings } from '$lib/stores/settings.svelte';
+  import { timer } from '$lib/stores/timer.svelte';
   import { Clock } from 'lucide-svelte';
 
   function handlePresetSelect(presetId: string): void {
@@ -21,12 +21,12 @@
     <Clock class="h-4 w-4" />
     Timer Presets
   </h3>
-  
+
   <div class="grid grid-cols-2 gap-2">
-    {#each $presets.presets as preset (preset.id)}
+    {#each presets.state.presets as preset (preset.id)}
       <button
-        on:click={() => handlePresetSelect(preset.id)}
-        class="flex flex-col p-3 rounded-lg text-left transition-all border {$presets.activePresetId === preset.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border hover:border-primary/50'}"
+        onclick={() => handlePresetSelect(preset.id)}
+        class="flex flex-col p-3 rounded-lg text-left transition-all border {presets.state.activePresetId === preset.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border hover:border-primary/50'}"
       >
         <span class="font-medium text-sm">{preset.name}</span>
         <span class="text-xs opacity-70">
