@@ -32,6 +32,11 @@
     if (event.key === 'Escape' && ui.activePanel) ui.closePanel();
   }
 
+  // Move keyboard focus into the workspace when it opens.
+  function autofocus(node: HTMLElement) {
+    node.focus();
+  }
+
   function stamp(): string {
     return new Date().toISOString().split('T')[0];
   }
@@ -46,7 +51,13 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if active}
-  <div class="fixed inset-0 z-40 bg-background" transition:fade={{ duration: 140 }}>
+  <div
+    class="fixed inset-0 z-40 bg-background"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{meta?.title ?? 'Workspace'} panel"
+    transition:fade={{ duration: 140 }}
+  >
     <div class="flex h-svh flex-col" in:fly={{ y: 14, duration: 260 }}>
       <!-- header: wordmark · live timer · close -->
       <header class="flex items-center justify-between border-b border-border px-5 py-4 sm:px-8">
@@ -66,6 +77,7 @@
             <span class="hidden text-xs text-muted-foreground sm:inline">{MODE_CONFIG[timer.state.currentMode].title}</span>
           </button>
           <button
+            use:autofocus
             onclick={() => ui.closePanel()}
             class="grid size-9 place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
             aria-label="Back to timer"

@@ -180,7 +180,14 @@
     </div>
 
     <!-- progress rule -->
-    <div class="mt-8 h-[3px] w-full bg-border">
+    <div
+      class="mt-8 h-[3px] w-full bg-border"
+      role="progressbar"
+      aria-label="{currentTitle} progress"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(elapsedPct)}
+    >
       <div
         class="h-full bg-primary transition-[width] duration-1000 ease-linear"
         style="width: {elapsedPct}%"

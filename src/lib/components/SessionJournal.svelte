@@ -36,7 +36,11 @@
   });
 </script>
 
-<div class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur px-6 py-4">
+<div
+  class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur px-6 py-4"
+  role="region"
+  aria-label="Save a note for the session you just finished"
+>
   <div class="mx-auto max-w-md space-y-3">
     <div class="flex items-center justify-between">
       <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Session Note</span>
@@ -49,6 +53,7 @@
         onkeydown={handleKeydown}
         type="text"
         placeholder="One line summary..."
+        aria-label="Session note"
         class="flex-1 h-9 rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       />
       <button
