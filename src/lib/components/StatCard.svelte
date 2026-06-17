@@ -1,14 +1,8 @@
 <script lang="ts">
-  import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-
   let { title, value }: { title: string; value: string } = $props();
 </script>
 
-<Card>
-  <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-    <CardTitle class="text-sm font-medium">{title}</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <div class="text-2xl font-bold">{value}</div>
-  </CardContent>
-</Card>
+<div>
+  <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{title}</div>
+  <div class="mt-3 text-3xl font-semibold tabular-nums text-foreground">{value}</div>
+</div>

@@ -55,13 +55,15 @@
     }
   });
 
-  // Ambient sound
+  // Ambient sound — single source of truth. Plays during a running focus session
+  // (or while previewing in the Sound panel), gated by the global sound toggle.
+  // Reading the selected sound + volume here makes changing them reconcile live.
   $effect(() => {
-    if (timer.state.isRunning && timer.state.currentMode === 'focus') {
-      sounds.playAmbient(settings.current.hasSound);
-    } else {
-      sounds.stopAmbient();
-    }
+    const playingForFocus = timer.state.isRunning && timer.state.currentMode === 'focus';
+    const active = (playingForFocus || sounds.previewing) && settings.current.hasSound;
+    void sounds.current.ambientSoundId;
+    void sounds.current.ambientVolume;
+    sounds.syncAmbient(active);
   });
 
   // Mode change: notifications + break prompt (untracked writes; only currentMode tracked)

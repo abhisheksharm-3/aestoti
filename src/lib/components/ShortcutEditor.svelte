@@ -31,19 +31,21 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="space-y-3">
+<div class="space-y-4">
   <div class="flex items-center justify-between">
-    <h3 class="text-sm font-medium">Keyboard Shortcuts</h3>
+    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Keyboard Shortcuts</div>
     <Button variant="ghost" size="sm" onclick={() => shortcuts.reset()}>Reset</Button>
   </div>
 
-  <div class="space-y-2">
+  <div class="divide-y divide-border">
     {#each shortcuts.current as shortcut (shortcut.action)}
-      <div class="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-        <span class="text-sm">{SHORTCUT_LABELS[shortcut.action]}</span>
+      <div class="flex items-center justify-between py-3">
+        <span class="text-sm text-foreground">{SHORTCUT_LABELS[shortcut.action]}</span>
         <button
           onclick={() => handleStartRecording(shortcut.action)}
-          class="px-3 py-1 text-xs font-mono rounded bg-background border min-w-20 text-center {recordingAction === shortcut.action ? 'animate-pulse border-primary' : ''}"
+          class="min-w-20 rounded-md border px-3 py-1 text-center font-mono text-[11px] transition-colors {recordingAction === shortcut.action
+            ? 'animate-pulse border-primary text-primary'
+            : 'border-border text-muted-foreground hover:text-foreground'}"
         >
           {recordingAction === shortcut.action ? 'Press key...' : shortcuts.format(shortcut)}
         </button>
@@ -51,5 +53,5 @@
     {/each}
   </div>
 
-  <p class="text-xs text-muted-foreground">Click a shortcut to reassign. Press Escape to cancel.</p>
+  <p class="font-mono text-[10px] text-muted-foreground">Click a shortcut to reassign. Press Escape to cancel.</p>
 </div>

@@ -3,19 +3,21 @@
 </script>
 
 <div class="space-y-3">
-  <h3 class="text-sm font-medium">Color Theme</h3>
+  <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Color</div>
 
-  <div class="grid grid-cols-3 gap-2">
+  <div class="mt-3 grid grid-cols-3 gap-2">
     {#each THEMES as theme (theme.id)}
       <button
         onclick={() => themes.setTheme(theme.id)}
-        class="flex items-center gap-2 p-3 rounded-lg transition-all border {themes.activeId === theme.id ? 'border-2 border-foreground bg-muted' : 'border-border bg-card hover:border-foreground/30'}"
+        class="flex items-center gap-2 rounded-md border p-3 transition-colors {themes.activeId === theme.id
+          ? 'border-primary bg-secondary'
+          : 'border-border hover:border-foreground/30'}"
       >
         <div
-          class="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+          class="h-4 w-4 rounded-sm border border-border"
           style="background-color: {theme.primary}"
         ></div>
-        <span class="text-sm font-medium">{theme.name}</span>
+        <span class="text-sm font-medium {themes.activeId === theme.id ? 'text-primary' : 'text-foreground'}">{theme.name}</span>
       </button>
     {/each}
   </div>

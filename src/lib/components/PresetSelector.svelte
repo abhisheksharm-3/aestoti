@@ -2,7 +2,6 @@
   import { presets, DEFAULT_PRESETS } from '$lib/stores/presets.svelte';
   import { settings } from '$lib/stores/settings.svelte';
   import { timer } from '$lib/stores/timer.svelte';
-  import { Clock } from 'lucide-svelte';
 
   function handlePresetSelect(presetId: string): void {
     const preset = presets.setActive(presetId);
@@ -17,19 +16,18 @@
 </script>
 
 <div class="space-y-3">
-  <h3 class="text-sm font-medium flex items-center gap-2">
-    <Clock class="h-4 w-4" />
-    Timer Presets
-  </h3>
+  <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Timer Presets</div>
 
-  <div class="grid grid-cols-2 gap-2">
+  <div class="mt-3 grid grid-cols-2 gap-2">
     {#each presets.state.presets as preset (preset.id)}
       <button
         onclick={() => handlePresetSelect(preset.id)}
-        class="flex flex-col p-3 rounded-lg text-left transition-all border {presets.state.activePresetId === preset.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border hover:border-primary/50'}"
+        class="flex flex-col items-start gap-1 rounded-md border p-3 text-left transition-colors {presets.state.activePresetId === preset.id
+          ? 'border-primary bg-primary/5'
+          : 'border-border hover:border-foreground/30'}"
       >
-        <span class="font-medium text-sm">{preset.name}</span>
-        <span class="text-xs opacity-70">
+        <span class="text-sm font-medium {presets.state.activePresetId === preset.id ? 'text-primary' : 'text-foreground'}">{preset.name}</span>
+        <span class="font-mono text-[11px] tabular-nums text-muted-foreground">
           {preset.focusLength}/{preset.shortLength}/{preset.longLength} min
         </span>
       </button>

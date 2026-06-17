@@ -5,7 +5,7 @@
   import { ui } from '$lib/stores/ui.svelte';
   import CommandPalette from '$lib/components/CommandPalette.svelte';
   import PanelHost from '$lib/components/PanelHost.svelte';
-  import { Command, SunMoon } from '@lucide/svelte';
+  import { Command, SunMoon, Settings2 } from '@lucide/svelte';
   import type { Snippet } from 'svelte';
 
   let { children }: { children: Snippet } = $props();
@@ -41,6 +41,14 @@
         <Command class="size-3.5" />
         <span class="hidden sm:inline">Command</span>
         <kbd class="rounded bg-muted px-1.5 py-0.5 text-[10px] tracking-wide">⌘K</kbd>
+      </button>
+      <button
+        onclick={() => ui.openPanel('settings')}
+        class="grid size-9 place-items-center rounded-lg border border-border bg-card/60 text-muted-foreground transition-colors hover:text-foreground"
+        aria-label="Open settings"
+        title="Settings"
+      >
+        <Settings2 class="size-4" />
       </button>
       <button
         onclick={() => toggleMode()}

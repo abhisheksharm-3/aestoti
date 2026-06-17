@@ -75,6 +75,8 @@ export type ThemeType = {
   primary: string;
   secondary: string;
   accent: string;
+  /** shadcn `--primary` token value ("H S% L%") so the whole UI recolors. */
+  primaryHsl: string;
 };
 
 export type ShortcutActionType =

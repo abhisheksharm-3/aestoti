@@ -36,11 +36,11 @@
   });
 </script>
 
-<div class="fixed bottom-0 inset-x-0 z-40 p-4 bg-background/95 backdrop-blur border-t shadow-lg">
-  <div class="max-w-md mx-auto space-y-3">
+<div class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur px-6 py-4">
+  <div class="mx-auto max-w-md space-y-3">
     <div class="flex items-center justify-between">
-      <p class="text-sm font-medium">What did you get done?</p>
-      <span class="text-xs text-muted-foreground">Auto-dismiss in {countdown}s</span>
+      <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Session Note</span>
+      <span class="font-mono text-[10px] tabular-nums text-muted-foreground">Auto-dismiss in {countdown}s</span>
     </div>
     <div class="flex gap-2">
       <input
@@ -53,13 +53,13 @@
       />
       <button
         onclick={handleSubmit}
-        class="px-4 h-9 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+        class="h-9 rounded-md bg-foreground px-4 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
       >
         Save
       </button>
       <button
         onclick={onDismiss}
-        class="px-3 h-9 rounded-md border text-sm hover:bg-muted transition-colors"
+        class="h-9 rounded-md border border-border px-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         Skip
       </button>

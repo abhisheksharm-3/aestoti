@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: SoundSettingsType = {
 };
 
 let current = $state<SoundSettingsType>({ ...DEFAULT_SETTINGS });
+let previewing = $state(false);
 let ambientAudio: HTMLAudioElement | null = null;
 
 function persist(): void {
@@ -39,6 +40,7 @@ function persist(): void {
 
 export const sounds = {
   get current() { return current; },
+  get previewing() { return previewing; },
 
   initialize(): void {
     if (!browser) return;
@@ -61,6 +63,10 @@ export const sounds = {
     persist();
   },
 
+  setPreview(value: boolean): void {
+    previewing = value;
+  },
+
   setNotificationSound(soundId: string): void {
     current = { ...current, notificationSoundId: soundId };
     persist();
@@ -71,13 +77,14 @@ export const sounds = {
     persist();
   },
 
-  playAmbient(hasSound: boolean): void {
-    if (!browser || !hasSound) {
-      this.stopAmbient();
-      return;
-    }
-    const preset = SOUND_PRESETS.find(p => p.id === current.ambientSoundId);
-    if (!preset || !preset.src) {
+  // Single source of truth for ambient playback. `active` is the caller's full
+  // intent (focus session running, or previewing, AND sound enabled). It reads
+  // the currently-selected sound + volume, so callers just pass whether ambient
+  // should be audible right now and this reconciles the <audio> element.
+  syncAmbient(active: boolean): void {
+    if (!browser) return;
+    const preset = SOUND_PRESETS.find((p) => p.id === current.ambientSoundId);
+    if (!active || !preset || !preset.src) {
       this.stopAmbient();
       return;
     }
@@ -85,16 +92,13 @@ export const sounds = {
       ambientAudio = new Audio();
       ambientAudio.loop = true;
     }
+    ambientAudio.volume = current.ambientVolume / 100;
     const fullSrc = new URL(preset.src, window.location.href).href;
     if (ambientAudio.src !== fullSrc) {
       ambientAudio.src = fullSrc;
-      ambientAudio.volume = current.ambientVolume / 100;
       ambientAudio.play().catch(() => {});
     } else if (ambientAudio.paused) {
-      ambientAudio.volume = current.ambientVolume / 100;
       ambientAudio.play().catch(() => {});
-    } else {
-      ambientAudio.volume = current.ambientVolume / 100;
     }
   },
 
