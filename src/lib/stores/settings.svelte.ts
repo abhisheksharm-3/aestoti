@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import type { SettingsType } from '$lib/types';
+import { writeStorage, removeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_settings';
 
@@ -43,11 +44,11 @@ export const settings = {
         ? (Math.min(clamp[1], Math.max(clamp[0], value)) as SettingsType[K])
         : value;
     current = { ...current, [key]: clamped };
-    if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+    writeStorage(STORAGE_KEY, JSON.stringify(current));
   },
 
   reset(): void {
     current = { ...DEFAULT_SETTINGS };
-    if (browser) localStorage.removeItem(STORAGE_KEY);
+    removeStorage(STORAGE_KEY);
   }
 };

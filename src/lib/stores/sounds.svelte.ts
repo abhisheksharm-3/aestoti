@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import type { SoundPresetType } from '$lib/types';
+import { writeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_sounds';
 
@@ -35,7 +36,7 @@ let previewing = $state(false);
 let ambientAudio: HTMLAudioElement | null = null;
 
 function persist(): void {
-  if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+  writeStorage(STORAGE_KEY, JSON.stringify(current));
 }
 
 export const sounds = {

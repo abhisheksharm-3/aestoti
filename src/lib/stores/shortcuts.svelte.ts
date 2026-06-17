@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import type { ShortcutType, ShortcutActionType } from '$lib/types';
+import { writeStorage, removeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_shortcuts';
 
@@ -36,12 +37,12 @@ export const shortcuts = {
 
   updateShortcut(action: ShortcutActionType, shortcut: Omit<ShortcutType, 'action'>): void {
     current = current.map(s => (s.action === action ? { ...shortcut, action } : s));
-    if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+    writeStorage(STORAGE_KEY, JSON.stringify(current));
   },
 
   reset(): void {
     current = [...DEFAULT_SHORTCUTS];
-    if (browser) localStorage.removeItem(STORAGE_KEY);
+    removeStorage(STORAGE_KEY);
   },
 
   matchesEvent(event: KeyboardEvent, action: ShortcutActionType): boolean {

@@ -17,6 +17,7 @@
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^25.9.3",
+    "@vite-pwa/sveltekit": "^1.1.0",
     "playwright": "^1.61.0",
     "svelte": "^5.56.1",
     "svelte-check": "^4.5.0",
@@ -28,7 +29,6 @@
   "dependencies": {
     "bits-ui": "^2.18.1",
     "clsx": "^2.1.1",
-    "cmdk-sv": "^0.0.19",
     "mode-watcher": "^1.1.0",
     "svelte-sonner": "^1.1.1",
     "tailwind-merge": "^3.6.0",

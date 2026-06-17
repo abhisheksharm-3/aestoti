@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import type { PomodoroSessionType, AnalyticsSummaryType, PomodoroModeType } from '$lib/types';
 import { generateId } from '$lib/utils/id';
+import { writeStorage, removeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_sessions';
 const DEFAULT_FOCUS_SECONDS = 25 * 60;
@@ -103,16 +104,16 @@ export const analytics = {
       isCompleted
     };
     sessions = [...sessions, session];
-    if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    writeStorage(STORAGE_KEY, JSON.stringify(sessions));
   },
 
   addNote(sessionId: string, note: string): void {
     sessions = sessions.map(s => (s.id === sessionId ? { ...s, note } : s));
-    if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    writeStorage(STORAGE_KEY, JSON.stringify(sessions));
   },
 
   clearAll(): void {
     sessions = [];
-    if (browser) localStorage.removeItem(STORAGE_KEY);
+    removeStorage(STORAGE_KEY);
   }
 };

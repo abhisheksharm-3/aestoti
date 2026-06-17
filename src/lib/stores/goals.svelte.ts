@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import type { DailyGoalType, DailyProgressType, PomodoroSessionType } from '$lib/types';
+import { writeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_goals';
 const DEFAULT_GOAL: DailyGoalType = { targetSessions: 8, isEnabled: true };
@@ -7,7 +8,7 @@ const DEFAULT_GOAL: DailyGoalType = { targetSessions: 8, isEnabled: true };
 let current = $state<DailyGoalType>({ ...DEFAULT_GOAL });
 
 function persist(): void {
-  if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+  writeStorage(STORAGE_KEY, JSON.stringify(current));
 }
 
 export const goals = {

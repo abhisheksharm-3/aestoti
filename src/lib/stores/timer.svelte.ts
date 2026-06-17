@@ -19,6 +19,10 @@ let intervalId: number | undefined;
 let modeStartTime: Date | undefined;
 let deadline: number | undefined;
 let onSessionComplete: SessionCompleteCallbackType | undefined;
+let visibilityHandler: (() => void) | null = null;
+// True when the most recent mode change came from a natural timer completion,
+// false when it came from a manual skip — so the UI only chimes on completion.
+let lastTransitionCompleted = false;
 
 function getModeDuration(mode: PomodoroModeType): number {
   const s = settings.current;
@@ -52,16 +56,22 @@ export const timer = {
     return getModeDuration(state.currentMode);
   },
 
+  get lastTransitionCompleted(): boolean {
+    return lastTransitionCompleted;
+  },
+
   setOnSessionComplete(callback: SessionCompleteCallbackType): void {
     onSessionComplete = callback;
   },
 
   initialize(): void {
     state.remainingSeconds = getModeDuration('focus');
-    if (browser) {
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) this.resync();
-      });
+    // Guard against re-adding on re-init (client nav / HMR) — see destroy().
+    if (browser && !visibilityHandler) {
+      visibilityHandler = () => {
+        if (!document.hidden) timer.resync();
+      };
+      document.addEventListener('visibilitychange', visibilityHandler);
     }
   },
 
@@ -72,7 +82,10 @@ export const timer = {
     state.isRunning = true;
     // Repaint from the wall clock — do NOT count down a local variable.
     intervalId = window.setInterval(() => {
-      const remaining = Math.round(((deadline ?? Date.now()) - Date.now()) / 1000);
+      // Bail if the mode was already completed (e.g. by resync) and the deadline
+      // cleared — prevents a queued tick from double-firing handleModeComplete.
+      if (deadline === undefined) return;
+      const remaining = Math.round((deadline - Date.now()) / 1000);
       if (remaining <= 0) {
         state.remainingSeconds = 0;
         this.handleModeComplete(true);
@@ -109,6 +122,7 @@ export const timer = {
   handleModeComplete(isCompleted: boolean): void {
     stopInterval();
     state.isRunning = false;
+    lastTransitionCompleted = true;
     if (modeStartTime) onSessionComplete?.(state.currentMode, modeStartTime, new Date(), isCompleted);
     const newFocusCount =
       state.currentMode === 'focus' ? state.focusSessionCount + 1 : state.focusSessionCount;
@@ -124,6 +138,7 @@ export const timer = {
   skip(): void {
     stopInterval();
     state.isRunning = false;
+    lastTransitionCompleted = false;
     if (modeStartTime) onSessionComplete?.(state.currentMode, modeStartTime, new Date(), false);
     // A skipped (abandoned) focus does NOT earn progress toward the long break,
     // so the cadence counter is left untouched and a skip always lands on a short
@@ -153,5 +168,9 @@ export const timer = {
 
   destroy(): void {
     stopInterval();
+    if (browser && visibilityHandler) {
+      document.removeEventListener('visibilitychange', visibilityHandler);
+      visibilityHandler = null;
+    }
   }
 };

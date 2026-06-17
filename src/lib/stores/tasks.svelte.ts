@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import type { TaskType } from '$lib/types';
 import { generateId } from '$lib/utils/id';
+import { writeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_tasks';
 
@@ -8,7 +9,7 @@ let tasks = $state<TaskType[]>([]);
 let activeTaskId = $state<string | null>(null);
 
 function persist(): void {
-  if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  writeStorage(STORAGE_KEY, JSON.stringify(tasks));
 }
 
 export const tasksStore = {

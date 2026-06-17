@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import type { TimerPresetType } from '$lib/types';
 import { generateId } from '$lib/utils/id';
+import { writeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_presets';
 
@@ -21,10 +22,7 @@ let state = $state<PresetsStateType>({ presets: [...DEFAULT_PRESETS], activePres
 function persist(): void {
   if (!browser) return;
   const customPresets = state.presets.filter(p => !DEFAULT_PRESETS.some(d => d.id === p.id));
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify({ customPresets, activePresetId: state.activePresetId })
-  );
+  writeStorage(STORAGE_KEY, JSON.stringify({ customPresets, activePresetId: state.activePresetId }));
 }
 
 export const presets = {

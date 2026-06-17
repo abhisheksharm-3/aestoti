@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import type { ThemeType } from '$lib/types';
+import { writeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_theme';
 
@@ -46,6 +47,6 @@ export const themes = {
   setTheme(themeId: string): void {
     activeThemeId = themeId;
     applyTheme(themeId);
-    if (browser) localStorage.setItem(STORAGE_KEY, themeId);
+    writeStorage(STORAGE_KEY, themeId);
   }
 };

@@ -71,7 +71,8 @@
     const currentMode = timer.state.currentMode;
     untrack(() => {
       if (currentMode === previousMode) return;
-      if (settings.current.hasNotification) {
+      // Only chime/notify on a natural completion — never on a manual skip.
+      if (settings.current.hasNotification && timer.lastTransitionCompleted) {
         const completedTitle = MODE_CONFIG[previousMode].title;
         const nextTitle = MODE_CONFIG[currentMode].title;
         toast.success("Time's up", {
