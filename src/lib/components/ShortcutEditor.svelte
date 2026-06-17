@@ -1,17 +1,16 @@
 <script lang="ts">
-  import { shortcuts, SHORTCUT_LABELS } from '$lib/shortcuts';
+  import { shortcuts, SHORTCUT_LABELS } from '$lib/stores/shortcuts.svelte';
   import { Button } from '$lib/components/ui/button';
   import type { ShortcutActionType } from '$lib/types';
 
-  let recordingAction: ShortcutActionType | null = null;
+  let recordingAction = $state<ShortcutActionType | null>(null);
 
-  function startRecording(action: ShortcutActionType): void {
+  function handleStartRecording(action: ShortcutActionType): void {
     recordingAction = action;
   }
 
   function handleKeydown(event: KeyboardEvent): void {
     if (!recordingAction) return;
-    
     event.preventDefault();
     event.stopPropagation();
 
@@ -26,38 +25,31 @@
       hasCtrl: event.ctrlKey,
       hasShift: event.shiftKey
     });
-
     recordingAction = null;
   }
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 <div class="space-y-3">
   <div class="flex items-center justify-between">
     <h3 class="text-sm font-medium">Keyboard Shortcuts</h3>
-    <Button variant="ghost" size="sm" on:click={() => shortcuts.reset()}>
-      Reset
-    </Button>
+    <Button variant="ghost" size="sm" onclick={() => shortcuts.reset()}>Reset</Button>
   </div>
-  
+
   <div class="space-y-2">
-    {#each $shortcuts as shortcut (shortcut.action)}
+    {#each shortcuts.current as shortcut (shortcut.action)}
       <div class="flex items-center justify-between p-2 rounded-lg bg-muted/50">
         <span class="text-sm">{SHORTCUT_LABELS[shortcut.action]}</span>
         <button
-          on:click={() => startRecording(shortcut.action)}
-          class="px-3 py-1 text-xs font-mono rounded bg-background border min-w-20 text-center"
-          class:animate-pulse={recordingAction === shortcut.action}
-          class:border-primary={recordingAction === shortcut.action}
+          onclick={() => handleStartRecording(shortcut.action)}
+          class="px-3 py-1 text-xs font-mono rounded bg-background border min-w-20 text-center {recordingAction === shortcut.action ? 'animate-pulse border-primary' : ''}"
         >
           {recordingAction === shortcut.action ? 'Press key...' : shortcuts.format(shortcut)}
         </button>
       </div>
     {/each}
   </div>
-  
-  <p class="text-xs text-muted-foreground">
-    Click a shortcut to reassign. Press Escape to cancel.
-  </p>
+
+  <p class="text-xs text-muted-foreground">Click a shortcut to reassign. Press Escape to cancel.</p>
 </div>
