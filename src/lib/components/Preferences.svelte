@@ -1,16 +1,16 @@
 <script lang="ts">
-  import Input from '$lib/components/ui/input/input.svelte';
-  import Label from '$lib/components/ui/label/label.svelte';
-  import Switch from '$lib/components/ui/switch/switch.svelte';
   import { mode, toggleMode } from 'mode-watcher';
-  import { settings } from '$lib/store';
-  import { timer } from '$lib/timer';
+  import { settings } from '$lib/stores/settings.svelte';
+  import { timer } from '$lib/stores/timer.svelte';
+  import { Label } from '$lib/components/ui/label';
+  import { Switch } from '$lib/components/ui/switch';
+  import { Input } from '$lib/components/ui/input';
 
-  $: isDarkMode = $mode === 'dark';
+  let isDarkMode = $derived(mode.current === 'dark');
 
-  function handleSettingChange<K extends keyof typeof $settings>(
+  function handleSettingChange<K extends keyof typeof settings.current>(
     key: K,
-    value: (typeof $settings)[K]
+    value: (typeof settings.current)[K]
   ): void {
     settings.updateSetting(key, value);
     timer.syncWithSettings();
@@ -21,30 +21,38 @@
   <div id="switch" class="flex items-center justify-center gap-3 flex-col">
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
       <Label class="text-left flex-grow" for="mode">Dark Mode</Label>
-      <Switch id="mode" on:click={toggleMode} checked={isDarkMode} />
+      <Switch id="mode" onclick={toggleMode} checked={isDarkMode} />
     </div>
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
       <Label class="text-left flex-grow" for="timer-auto">Auto Resume Timer</Label>
       <Switch
         id="timer-auto"
-        checked={$settings.isAutoTime}
-        on:click={() => handleSettingChange('isAutoTime', !$settings.isAutoTime)}
+        checked={settings.current.isAutoTime}
+        onclick={() => handleSettingChange('isAutoTime', !settings.current.isAutoTime)}
       />
     </div>
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
       <Label class="text-left flex-grow" for="sound">Sound</Label>
       <Switch
         id="sound"
-        checked={$settings.hasSound}
-        on:click={() => handleSettingChange('hasSound', !$settings.hasSound)}
+        checked={settings.current.hasSound}
+        onclick={() => handleSettingChange('hasSound', !settings.current.hasSound)}
       />
     </div>
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
       <Label class="text-left flex-grow" for="notification">Notifications</Label>
       <Switch
         id="notification"
-        checked={$settings.hasNotification}
-        on:click={() => handleSettingChange('hasNotification', !$settings.hasNotification)}
+        checked={settings.current.hasNotification}
+        onclick={() => handleSettingChange('hasNotification', !settings.current.hasNotification)}
+      />
+    </div>
+    <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
+      <Label class="text-left flex-grow" for="break-prompts">Break Prompts</Label>
+      <Switch
+        id="break-prompts"
+        checked={settings.current.hasBreakPrompts}
+        onclick={() => handleSettingChange('hasBreakPrompts', !settings.current.hasBreakPrompts)}
       />
     </div>
   </div>
@@ -56,8 +64,8 @@
         type="number"
         class="w-24 p-2 border border-gray-300 rounded"
         id="focus-length"
-        value={$settings.focusLength}
-        on:change={(e) => handleSettingChange('focusLength', Number(e.currentTarget.value))}
+        value={settings.current.focusLength}
+        onchange={(e) => handleSettingChange('focusLength', Number(e.currentTarget.value))}
       />
     </div>
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
@@ -66,8 +74,8 @@
         type="number"
         class="w-24 p-2 border border-gray-300 rounded"
         id="long-break-interval"
-        value={$settings.longBreakInterval}
-        on:change={(e) => handleSettingChange('longBreakInterval', Number(e.currentTarget.value))}
+        value={settings.current.longBreakInterval}
+        onchange={(e) => handleSettingChange('longBreakInterval', Number(e.currentTarget.value))}
       />
     </div>
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
@@ -76,8 +84,8 @@
         type="number"
         class="w-24 p-2 border border-gray-300 rounded"
         id="short-length"
-        value={$settings.shortLength}
-        on:change={(e) => handleSettingChange('shortLength', Number(e.currentTarget.value))}
+        value={settings.current.shortLength}
+        onchange={(e) => handleSettingChange('shortLength', Number(e.currentTarget.value))}
       />
     </div>
     <div class="flex items-center text-left gap-5 lg:gap-8 w-full">
@@ -86,8 +94,8 @@
         type="number"
         class="w-24 p-2 border border-gray-300 rounded"
         id="long-length"
-        value={$settings.longLength}
-        on:change={(e) => handleSettingChange('longLength', Number(e.currentTarget.value))}
+        value={settings.current.longLength}
+        onchange={(e) => handleSettingChange('longLength', Number(e.currentTarget.value))}
       />
     </div>
   </div>
