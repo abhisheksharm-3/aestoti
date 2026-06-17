@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Check, Trash2, Plus, Play } from 'lucide-svelte';
+  import { Check, Trash2, Plus, Play } from '@lucide/svelte';
   import { tasksStore } from '$lib/stores/tasks.svelte';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
