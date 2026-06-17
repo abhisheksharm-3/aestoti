@@ -1,0 +1,116 @@
+import { browser } from '$app/environment';
+import type { SoundPresetType } from '$lib/types';
+
+const STORAGE_KEY = 'aestoti_sounds';
+
+type SoundSettingsType = {
+  ambientSoundId: string;
+  ambientVolume: number;
+  notificationSoundId: string;
+  notificationVolume: number;
+};
+
+export const SOUND_PRESETS: SoundPresetType[] = [
+  { id: 'none', name: 'None', icon: '🔇', src: '' },
+  { id: 'clock', name: 'Clock Tick', icon: '⏰', src: '/clock-sound-tick.mp3' },
+  { id: 'rain', name: 'Rain', icon: '🌧️', src: '/sounds/rain.mp3' },
+  { id: 'forest', name: 'Forest', icon: '🌲', src: '/sounds/forest.mp3' },
+  { id: 'ocean', name: 'Ocean Waves', icon: '🌊', src: '/sounds/ocean.mp3' },
+  { id: 'fire', name: 'Fireplace', icon: '🔥', src: '/sounds/fire.mp3' }
+];
+
+export const NOTIFICATION_SOUNDS: SoundPresetType[] = [
+  { id: 'bell', name: 'Bell', icon: '🔔', src: '/clock-sound-tick.mp3' }
+];
+
+const DEFAULT_SETTINGS: SoundSettingsType = {
+  ambientSoundId: 'none',
+  ambientVolume: 50,
+  notificationSoundId: 'bell',
+  notificationVolume: 80
+};
+
+let current = $state<SoundSettingsType>({ ...DEFAULT_SETTINGS });
+let ambientAudio: HTMLAudioElement | null = null;
+
+function persist(): void {
+  if (browser) localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+}
+
+export const sounds = {
+  get current() { return current; },
+
+  initialize(): void {
+    if (!browser) return;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) current = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) as SoundSettingsType };
+    } catch {
+      current = { ...DEFAULT_SETTINGS };
+    }
+  },
+
+  setAmbientSound(soundId: string): void {
+    current = { ...current, ambientSoundId: soundId };
+    persist();
+  },
+
+  setAmbientVolume(volume: number): void {
+    current = { ...current, ambientVolume: Math.min(100, Math.max(0, volume)) };
+    if (ambientAudio) ambientAudio.volume = current.ambientVolume / 100;
+    persist();
+  },
+
+  setNotificationSound(soundId: string): void {
+    current = { ...current, notificationSoundId: soundId };
+    persist();
+  },
+
+  setNotificationVolume(volume: number): void {
+    current = { ...current, notificationVolume: Math.min(100, Math.max(0, volume)) };
+    persist();
+  },
+
+  playAmbient(hasSound: boolean): void {
+    if (!browser || !hasSound) {
+      this.stopAmbient();
+      return;
+    }
+    const preset = SOUND_PRESETS.find(p => p.id === current.ambientSoundId);
+    if (!preset || !preset.src) {
+      this.stopAmbient();
+      return;
+    }
+    if (!ambientAudio) {
+      ambientAudio = new Audio();
+      ambientAudio.loop = true;
+    }
+    const fullSrc = new URL(preset.src, window.location.href).href;
+    if (ambientAudio.src !== fullSrc) {
+      ambientAudio.src = fullSrc;
+      ambientAudio.volume = current.ambientVolume / 100;
+      ambientAudio.play().catch(() => {});
+    } else if (ambientAudio.paused) {
+      ambientAudio.volume = current.ambientVolume / 100;
+      ambientAudio.play().catch(() => {});
+    } else {
+      ambientAudio.volume = current.ambientVolume / 100;
+    }
+  },
+
+  stopAmbient(): void {
+    if (ambientAudio) {
+      ambientAudio.pause();
+      ambientAudio.currentTime = 0;
+    }
+  },
+
+  playNotification(): void {
+    if (!browser) return;
+    const preset = NOTIFICATION_SOUNDS.find(p => p.id === current.notificationSoundId);
+    if (!preset || !preset.src) return;
+    const audio = new Audio(preset.src);
+    audio.volume = current.notificationVolume / 100;
+    audio.play().catch(() => {});
+  }
+};
