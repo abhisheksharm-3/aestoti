@@ -1,5 +1,8 @@
-@import "tailwindcss";
+/* Third-party @import must precede the Tailwind import: `@import "tailwindcss"`
+   expands inline, and a font @import placed after it would no longer be first
+   (CSS requires all @import to precede other statements). */
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap');
+@import "tailwindcss";
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -24,6 +27,18 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
+  --font-sans: "Roboto Flex", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Tailwind v4 dropped tailwind.config.js, which had defined the Roboto Flex font
+   and a centered/padded `container`. Both are restored here (Preferences.svelte
+   still uses the `container` class). */
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @variant 2xl {
+    max-width: 1400px;
+  }
 }
 
 @layer base {
@@ -73,7 +88,7 @@
   }
 
   * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+  body { @apply bg-background text-foreground font-sans; }
 }
 
 .hide-scrollbar::-webkit-scrollbar { display: none; }
