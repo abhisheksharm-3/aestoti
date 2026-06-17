@@ -8,7 +8,7 @@ const STORAGE_KEY = 'aestoti_theme';
 // just the few inline-styled timer buttons. `primary`/`accent` hex remain for
 // the swatch preview and the legacy `--theme-*` vars.
 export const THEMES: ThemeType[] = [
-  { id: 'tomato', name: 'Tomato', primary: '#FF4C4C', secondary: '#471515', accent: '#FF6B6B', primaryHsl: '0 100% 65%' },
+  { id: 'tomato', name: 'Tomato', primary: '#C4411F', secondary: '#471515', accent: '#E0633B', primaryHsl: '13 74% 44%' },
   { id: 'ocean', name: 'Ocean', primary: '#0EA5E9', secondary: '#0C4A6E', accent: '#38BDF8', primaryHsl: '199 89% 48%' },
   { id: 'forest', name: 'Forest', primary: '#22C55E', secondary: '#14532D', accent: '#4ADE80', primaryHsl: '142 71% 45%' },
   { id: 'sunset', name: 'Sunset', primary: '#F97316', secondary: '#7C2D12', accent: '#FB923C', primaryHsl: '25 95% 53%' },

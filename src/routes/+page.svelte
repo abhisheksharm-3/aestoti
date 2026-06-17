@@ -3,13 +3,10 @@
   import Pomodoro from '$lib/components/Pomodoro.svelte';
 </script>
 
-<div class="flex items-center justify-center h-[calc(100vh-14.5rem)] scroll-smooth">
+<div class="flex h-full items-center justify-center">
   {#if browser}
     <Pomodoro />
   {:else}
-    <div class="flex flex-col items-center text-9xl tracking-widest font-light">
-      <div>25</div>
-      <div>00</div>
-    </div>
+    <div class="text-8xl font-medium tabular-nums tracking-tight text-foreground">25:00</div>
   {/if}
 </div>

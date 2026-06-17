@@ -1,62 +1,50 @@
 <script lang="ts">
   import { onMount, onDestroy, untrack } from 'svelte';
-  import {
-    RiBrainLine,
-    RiCupLine,
-    RiMoreFill,
-    RiPlayLargeFill,
-    RiPauseLargeFill,
-    RiSkipForwardFill,
-    RiTreeLine,
-    RiFullscreenFill
-  } from 'svelte-remixicon';
-  import { crossfade } from 'svelte/transition';
-  import { cubicOut } from 'svelte/easing';
+  import { Play, Pause, SkipForward, Maximize2 } from '@lucide/svelte';
   import { toast } from 'svelte-sonner';
-  import * as Drawer from '$lib/components/ui/drawer';
   import { timer, MODE_CONFIG } from '$lib/stores/timer.svelte';
   import { settings } from '$lib/stores/settings.svelte';
   import { analytics } from '$lib/stores/analytics.svelte';
+  import { goals } from '$lib/stores/goals.svelte';
   import { tasksStore } from '$lib/stores/tasks.svelte';
   import { sounds } from '$lib/stores/sounds.svelte';
   import { shortcuts } from '$lib/stores/shortcuts.svelte';
+  import { ui } from '$lib/stores/ui.svelte';
   import { notifications } from '$lib/services/notifications';
-  import ControlPanel from './ControlPanel.svelte';
-  import DailyGoal from './DailyGoal.svelte';
   import FullscreenMode from './FullscreenMode.svelte';
-  import ProgressRing from './ProgressRing.svelte';
   import SessionJournal from './SessionJournal.svelte';
   import BreakPrompt from './BreakPrompt.svelte';
 
-  const MODE_ICONS = {
-    focus: RiBrainLine,
-    shortBreak: RiCupLine,
-    longBreak: RiTreeLine
-  } as const;
-
-  let isDrawerOpen = $state(false);
-  let isFullscreen = $state(false);
   let isJournalVisible = $state(false);
   let isBreakPromptVisible = $state(false);
   let previousMode = $state<keyof typeof MODE_CONFIG>('focus');
 
-  let ModeIcon = $derived(MODE_ICONS[timer.state.currentMode]);
   let currentTitle = $derived(MODE_CONFIG[timer.state.currentMode].title);
-  let PlayPauseIcon = $derived(timer.state.isRunning ? RiPauseLargeFill : RiPlayLargeFill);
-  let activeTask = $derived(tasksStore.tasks.find(t => t.id === tasksStore.activeTaskId));
-
-  const [send, receive] = crossfade({
-    duration: 500,
-    fallback(node) {
-      const style = getComputedStyle(node);
-      const transform = style.transform === 'none' ? '' : style.transform;
-      return {
-        duration: 600,
-        easing: cubicOut,
-        css: (t) => `transform: ${transform} scale(${t}); opacity: ${t}`
-      };
-    }
+  let activeTask = $derived(tasksStore.tasks.find((t) => t.id === tasksStore.activeTaskId));
+  let blockMinutes = $derived(Math.round(timer.totalSeconds / 60));
+  let elapsedPct = $derived(
+    timer.totalSeconds > 0
+      ? Math.min(100, ((timer.totalSeconds - timer.state.remainingSeconds) / timer.totalSeconds) * 100)
+      : 0
+  );
+  let goalTarget = $derived(goals.current.targetSessions);
+  let sessionsToday = $derived(analytics.summary.sessionsToday);
+  let streak = $derived(analytics.summary.currentStreak);
+  let todayMinutes = $derived.by(() => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    return Math.round(
+      analytics.sessions
+        .filter((s) => s.mode === 'focus' && new Date(s.startTime) >= start)
+        .reduce((sum, s) => sum + s.durationSeconds, 0) / 60
+    );
   });
+
+  function formatTime(minutes: number): string {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
 
   // Wire session-complete callback once at component init
   timer.setOnSessionComplete((mode, startTime, endTime, isCompleted) => {
@@ -76,9 +64,7 @@
     }
   });
 
-  // Mode change: notifications + break prompt. Only `timer.state.currentMode` is
-  // a tracked dependency; the comparison/state writes run inside untrack so the
-  // effect doesn't re-fire on its own `previousMode` write.
+  // Mode change: notifications + break prompt (untracked writes; only currentMode tracked)
   $effect(() => {
     const currentMode = timer.state.currentMode;
     untrack(() => {
@@ -86,9 +72,9 @@
       if (settings.current.hasNotification) {
         const completedTitle = MODE_CONFIG[previousMode].title;
         const nextTitle = MODE_CONFIG[currentMode].title;
-        toast.success("Great job! Time's up!", {
-          description: `${completedTitle} complete. Ready for ${nextTitle}?`,
-          action: { label: `Skip ${nextTitle}`, onclick: () => timer.skip() }
+        toast.success("Time's up", {
+          description: `${completedTitle} complete. Up next: ${nextTitle}.`,
+          action: { label: `Skip ${nextTitle}`, onClick: () => timer.skip() }
         });
         notifications.showTimerComplete(completedTitle, nextTitle);
         sounds.playNotification();
@@ -111,7 +97,7 @@
   function handleKeydown(event: KeyboardEvent): void {
     if (shortcuts.matchesEvent(event, 'openSettings')) {
       event.preventDefault();
-      isDrawerOpen = !isDrawerOpen;
+      ui.openPanel('settings');
     } else if (shortcuts.matchesEvent(event, 'toggleTimer')) {
       event.preventDefault();
       handleToggleTimer();
@@ -123,12 +109,11 @@
       timer.restart();
     } else if (shortcuts.matchesEvent(event, 'toggleFullscreen')) {
       event.preventDefault();
-      isFullscreen = !isFullscreen;
+      ui.fullscreen = !ui.fullscreen;
     }
   }
 
-  // Request notification permission on the FIRST timer start, not on page load.
-  // Cold-prompting on load is an anti-pattern browsers and users penalize.
+  // Ask for notification permission on first start, never on cold load.
   async function ensureNotificationPermission(): Promise<void> {
     if (
       settings.current.hasNotification &&
@@ -160,112 +145,99 @@
   <link rel="icon" href="/logo-short.png" />
 </svelte:head>
 
-{#if isFullscreen}
-  <FullscreenMode onExit={() => (isFullscreen = false)} />
+{#if ui.fullscreen}
+  <FullscreenMode onExit={() => (ui.fullscreen = false)} />
 {:else}
-  <Drawer.Root bind:open={isDrawerOpen}>
-    <div class="flex flex-col items-center justify-center h-full gap-5 px-4">
-      <DailyGoal />
+  <div class="mx-auto flex h-full w-full max-w-5xl flex-col justify-center px-6 sm:px-10">
+    <!-- eyebrow -->
+    <div class="flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+      <span class="text-foreground">{currentTitle}</span>
+      <span class="h-px flex-1 bg-border"></span>
+      <span class="tabular-nums">
+        Session {String(Math.min(sessionsToday + 1, goalTarget)).padStart(2, '0')} / {String(goalTarget).padStart(2, '0')}
+      </span>
+      <span class="hidden h-px w-12 bg-border sm:block"></span>
+      <span class="hidden tabular-nums sm:inline">{blockMinutes} min block</span>
+    </div>
 
-      {#key timer.state.currentMode}
-        <div
-          class="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-sm font-medium tracking-wide"
-          in:receive={{ key: timer.state.currentMode }}
-          out:send={{ key: timer.state.currentMode }}
-        >
-          <ModeIcon class="h-4 w-4 text-primary" />
-          <span>{currentTitle}</span>
-        </div>
-      {/key}
+    {#if isBreakPromptVisible}
+      <div class="mt-6">
+        <BreakPrompt mode={timer.state.currentMode} onDismiss={() => (isBreakPromptVisible = false)} />
+      </div>
+    {/if}
 
-      {#if activeTask}
-        <div class="flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1.5 text-sm text-muted-foreground">
-          <span class="h-1.5 w-1.5 rounded-full bg-primary"></span>
-          <span>Working on</span>
-          <span class="font-semibold text-foreground">{activeTask.title}</span>
-          {#if activeTask.focusSessionsSpent > 0}
-            <span class="text-xs">🍅 {activeTask.focusSessionsSpent}</span>
-          {/if}
-        </div>
-      {/if}
+    <!-- giant time -->
+    <div
+      class="mt-6 font-semibold leading-[0.78] tracking-[-0.045em] tabular-nums select-none"
+      style="font-size: clamp(4.5rem, 21vw, 15rem)"
+    >
+      <span>{timer.formattedTime.minutes}</span><span class="text-muted-foreground/30">:</span><span
+        class="text-primary">{timer.formattedTime.seconds}</span
+      >
+    </div>
 
-      {#if isBreakPromptVisible}
-        <BreakPrompt
-          mode={timer.state.currentMode}
-          onDismiss={() => (isBreakPromptVisible = false)}
-        />
-      {/if}
+    <!-- progress rule -->
+    <div class="mt-8 h-[3px] w-full bg-border">
+      <div
+        class="h-full bg-primary transition-[width] duration-1000 ease-linear"
+        style="width: {elapsedPct}%"
+      ></div>
+    </div>
 
-      <div class="relative my-1 flex items-center justify-center">
-        {#if timer.state.isRunning}
-          <div class="pointer-events-none absolute h-40 w-40 rounded-full bg-primary/20 blur-3xl motion-safe:animate-pulse"></div>
-        {/if}
-        <ProgressRing
-          remainingSeconds={timer.state.remainingSeconds}
-          totalSeconds={timer.totalSeconds}
-          size={300}
-          strokeWidth={6}
-        />
-        <div class="absolute flex flex-col items-center">
-          <div class="text-7xl font-medium leading-none tracking-tight tabular-nums sm:text-8xl">
-            {timer.formattedTime.minutes}:{timer.formattedTime.seconds}
+    <!-- footer: data + transport -->
+    <div class="mt-7 flex flex-col gap-6 border-t border-border pt-6 sm:flex-row sm:items-end sm:justify-between">
+      <div class="flex flex-wrap gap-x-12 gap-y-4">
+        <button onclick={() => ui.openPanel('tasks')} class="group text-left">
+          <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Now</div>
+          <div class="mt-1.5 text-[15px] font-medium text-foreground transition-colors group-hover:text-primary">
+            {#if activeTask}
+              {activeTask.title}{#if activeTask.focusSessionsSpent > 0}<span class="ml-2 text-muted-foreground">· {activeTask.focusSessionsSpent}🍅</span>{/if}
+            {:else}
+              <span class="text-muted-foreground">Pick a task →</span>
+            {/if}
           </div>
-          <div class="mt-3 text-[11px] uppercase tracking-[0.3em] text-primary">{currentTitle}</div>
-        </div>
+        </button>
+        <button onclick={() => ui.openPanel('stats')} class="group text-left">
+          <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Today</div>
+          <div class="mt-1.5 text-[15px] font-medium tabular-nums text-foreground transition-colors group-hover:text-primary">
+            {formatTime(todayMinutes)} · {sessionsToday} sessions · {streak}d streak
+          </div>
+        </button>
       </div>
 
-      <div class="flex items-center gap-2" aria-hidden="true">
-        {#each Array.from({ length: settings.current.longBreakInterval }) as _, i}
-          <span
-            class="h-1.5 w-1.5 rounded-full transition-colors {i < timer.state.focusSessionCount % settings.current.longBreakInterval
-              ? 'bg-primary'
-              : 'bg-border'}"
-          ></span>
-        {/each}
-      </div>
-
-      <div class="mt-1 flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <button
-          onclick={() => (isFullscreen = true)}
-          class="grid h-12 w-12 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
+          onclick={() => (ui.fullscreen = true)}
+          class="grid size-11 place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
           aria-label="Enter fullscreen"
           title="Fullscreen (Alt+F)"
         >
-          <RiFullscreenFill class="h-5 w-5" />
-        </button>
-        <button
-          onclick={handleToggleTimer}
-          class="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition hover:brightness-105 motion-safe:hover:scale-105"
-          aria-label={timer.state.isRunning ? 'Pause timer' : 'Start timer'}
-        >
-          <PlayPauseIcon class="h-7 w-7" />
+          <Maximize2 class="size-4" />
         </button>
         <button
           onclick={() => timer.skip()}
-          class="grid h-12 w-12 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
+          class="grid size-11 place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
           aria-label="Skip to next mode"
           title="Skip (Alt+N)"
         >
-          <RiSkipForwardFill class="h-5 w-5" />
+          <SkipForward class="size-4" />
         </button>
         <button
-          onclick={() => (isDrawerOpen = true)}
-          class="grid h-12 w-12 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
-          aria-label="Open control panel"
-          title="Settings (Alt+S)"
+          onclick={handleToggleTimer}
+          class="inline-flex h-11 items-center gap-2 rounded-md bg-foreground px-7 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
+          aria-label={timer.state.isRunning ? 'Pause timer' : 'Start timer'}
         >
-          <RiMoreFill class="h-5 w-5" />
+          {#if timer.state.isRunning}
+            <Pause class="size-4" /> Pause
+          {:else}
+            <Play class="size-4" /> Start
+          {/if}
         </button>
       </div>
     </div>
-
-    <ControlPanel />
-  </Drawer.Root>
+  </div>
 {/if}
 
 {#if isJournalVisible}
-  <SessionJournal
-    onSubmit={handleJournalSubmit}
-    onDismiss={() => (isJournalVisible = false)}
-  />
+  <SessionJournal onSubmit={handleJournalSubmit} onDismiss={() => (isJournalVisible = false)} />
 {/if}
