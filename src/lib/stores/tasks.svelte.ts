@@ -5,15 +5,15 @@ import { writeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_tasks';
 
-let tasks = $state<TaskType[]>([]);
+let items = $state<TaskType[]>([]);
 let activeTaskId = $state<string | null>(null);
 
 function persist(): void {
-  writeStorage(STORAGE_KEY, JSON.stringify(tasks));
+  writeStorage(STORAGE_KEY, JSON.stringify(items));
 }
 
-export const tasksStore = {
-  get tasks() { return tasks; },
+export const tasks = {
+  get tasks() { return items; },
   get activeTaskId() { return activeTaskId; },
   set activeTaskId(id: string | null) { activeTaskId = id; },
 
@@ -21,14 +21,14 @@ export const tasksStore = {
     if (!browser) return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) tasks = JSON.parse(stored) as TaskType[];
+      if (stored) items = JSON.parse(stored) as TaskType[];
     } catch {
-      tasks = [];
+      items = [];
     }
   },
 
   add(title: string): void {
-    tasks = [
+    items = [
       {
         id: generateId('task'),
         title,
@@ -37,13 +37,13 @@ export const tasksStore = {
         completedAt: null,
         focusSessionsSpent: 0
       },
-      ...tasks
+      ...items
     ];
     persist();
   },
 
   toggle(id: string): void {
-    tasks = tasks.map(t =>
+    items = items.map(t =>
       t.id !== id
         ? t
         : {
@@ -56,20 +56,20 @@ export const tasksStore = {
   },
 
   remove(id: string): void {
-    tasks = tasks.filter(t => t.id !== id);
+    items = items.filter(t => t.id !== id);
     if (activeTaskId === id) activeTaskId = null;
     persist();
   },
 
   incrementSession(id: string): void {
-    tasks = tasks.map(t =>
+    items = items.map(t =>
       t.id !== id ? t : { ...t, focusSessionsSpent: t.focusSessionsSpent + 1 }
     );
     persist();
   },
 
   clearCompleted(): void {
-    tasks = tasks.filter(t => !t.isCompleted);
+    items = items.filter(t => !t.isCompleted);
     persist();
   }
 };

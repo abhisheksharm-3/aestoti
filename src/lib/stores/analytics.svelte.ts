@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import type { PomodoroSessionType, AnalyticsSummaryType, PomodoroModeType } from '$lib/types';
 import { generateId } from '$lib/utils/id';
+import { dayKey } from '$lib/utils/date';
 import { writeStorage, removeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_sessions';
@@ -14,24 +15,24 @@ function focusOnly(list: PomodoroSessionType[]): PomodoroSessionType[] {
 
 function calculateStreak(list: PomodoroSessionType[]): number {
   if (list.length === 0) return 0;
-  const uniqueDates = [...new Set(list.map(s => new Date(s.startTime).toDateString()))].sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime()
-  );
+  // Local day keys (YYYY-MM-DD) sort lexicographically; reverse for newest-first.
+  const uniqueDays = [...new Set(list.map(s => dayKey(s.startTime)))].sort().reverse();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   // Keep the streak alive while today is still in progress: it only breaks once
   // the most recent active day is older than yesterday.
-  if (uniqueDates[0] !== today.toDateString() && uniqueDates[0] !== yesterday.toDateString()) {
+  if (uniqueDays[0] !== dayKey(today) && uniqueDays[0] !== dayKey(yesterday)) {
     return 0;
   }
-  const anchor = new Date(uniqueDates[0]);
+  // Parse the anchor as a local midnight (append time so it isn't read as UTC).
+  const anchor = new Date(`${uniqueDays[0]}T00:00:00`);
   let streak = 0;
-  for (let i = 0; i < uniqueDates.length; i++) {
+  for (let i = 0; i < uniqueDays.length; i++) {
     const expected = new Date(anchor);
     expected.setDate(anchor.getDate() - i);
-    if (uniqueDates[i] === expected.toDateString()) streak++;
+    if (uniqueDays[i] === dayKey(expected)) streak++;
     else break;
   }
   return streak;
@@ -56,14 +57,15 @@ export const analytics = {
     today.setHours(0, 0, 0, 0);
     const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
-    const longestSession = focus.length > 0 ? Math.max(...focus.map(s => s.durationSeconds)) : 0;
+    // reduce (not Math.max(...spread)) so a very large history can't overflow the call stack.
+    const longestSession = focus.reduce((max, s) => Math.max(max, s.durationSeconds), 0);
 
     return {
       totalSessions: focus.length,
       totalFocusMinutes: totalMinutes,
       averageSessionMinutes: focus.length > 0 ? Math.round(totalMinutes / focus.length) : 0,
       longestSessionMinutes: Math.floor(longestSession / 60),
-      totalDays: new Set(focus.map(s => new Date(s.startTime).toDateString())).size,
+      totalDays: new Set(focus.map(s => dayKey(s.startTime))).size,
       sessionsToday: focus.filter(s => new Date(s.startTime) >= today).length,
       sessionsThisWeek: focus.filter(s => new Date(s.startTime) >= weekAgo).length,
       currentStreak: calculateStreak(focus)
@@ -105,6 +107,24 @@ export const analytics = {
     };
     sessions = [...sessions, session];
     writeStorage(STORAGE_KEY, JSON.stringify(sessions));
+  },
+
+  /**
+   * Restore sessions from an exported file. `replace` overwrites everything;
+   * otherwise incoming sessions are merged, skipping ids already present.
+   * Returns how many sessions were added.
+   */
+  importSessions(incoming: PomodoroSessionType[], replace = false): number {
+    if (replace) {
+      sessions = [...incoming];
+      writeStorage(STORAGE_KEY, JSON.stringify(sessions));
+      return incoming.length;
+    }
+    const existingIds = new Set(sessions.map(s => s.id));
+    const fresh = incoming.filter(s => !existingIds.has(s.id));
+    sessions = [...sessions, ...fresh];
+    writeStorage(STORAGE_KEY, JSON.stringify(sessions));
+    return fresh.length;
   },
 
   addNote(sessionId: string, note: string): void {

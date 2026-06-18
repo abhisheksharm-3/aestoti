@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { Play, Pause } from '@lucide/svelte';
-  import { sounds, SOUND_PRESETS } from '$lib/stores/sounds.svelte';
+  import { sounds } from '$lib/stores/sounds.svelte';
+  import { SOUND_PRESETS } from '$lib/config/sounds';
 
   let selected = $derived(sounds.current.ambientSoundId);
   let hasSound = $derived(selected !== 'none');

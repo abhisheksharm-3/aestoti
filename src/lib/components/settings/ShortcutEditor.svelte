@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { shortcuts, SHORTCUT_LABELS } from '$lib/stores/shortcuts.svelte';
+  import { shortcuts } from '$lib/stores/shortcuts.svelte';
+  import { SHORTCUT_LABELS } from '$lib/config/shortcuts';
   import { Button } from '$lib/components/ui/button';
   import type { ShortcutActionType } from '$lib/types';
 

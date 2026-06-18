@@ -1,4 +1,5 @@
 import type { PomodoroSessionType, DailySessionDataType, HourlyProductivityType } from '$lib/types';
+import { dayKey } from './date';
 
 export function calculateDailyData(
   sessions: PomodoroSessionType[],
@@ -11,13 +12,13 @@ export function calculateDailyData(
   for (let i = 0; i < days; i++) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
+    // Local day key so the grid lines up with the streak/"today" counters.
+    const dateStr = dayKey(date);
     dailyMap.set(dateStr, { date: dateStr, sessionCount: 0, totalMinutes: 0 });
   }
 
   focusSessions.forEach(session => {
-    const dateStr = session.startTime.split('T')[0];
-    const existing = dailyMap.get(dateStr);
+    const existing = dailyMap.get(dayKey(session.startTime));
     if (existing) {
       existing.sessionCount++;
       existing.totalMinutes += Math.round(session.durationSeconds / 60);

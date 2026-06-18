@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { settings } from './settings.svelte';
+import { settings, sanitizeSettings } from './settings.svelte';
 
 beforeEach(() => {
   settings.reset();
@@ -90,6 +90,40 @@ describe('settings.updateSetting clamping', () => {
       settings.updateSetting('hasSound', true);
       expect(settings.current.hasSound).toBe(true);
     });
+  });
+});
+
+describe('settings.updateSetting NaN guard', () => {
+  it('ignores a NaN value and keeps the previous setting', () => {
+    settings.updateSetting('focusLength', 30);
+    settings.updateSetting('focusLength', NaN);
+    expect(settings.current.focusLength).toBe(30);
+  });
+});
+
+describe('sanitizeSettings (load-time hardening)', () => {
+  it('clamps an out-of-range stored value', () => {
+    expect(sanitizeSettings({ focusLength: 9999 }).focusLength).toBe(180);
+  });
+
+  it('clamps a below-range stored value', () => {
+    expect(sanitizeSettings({ longBreakInterval: 0 }).longBreakInterval).toBe(1);
+  });
+
+  it('replaces a non-numeric stored value with the default', () => {
+    expect(sanitizeSettings({ shortLength: 'oops' as unknown as number }).shortLength).toBe(5);
+  });
+
+  it('replaces NaN with the default', () => {
+    expect(sanitizeSettings({ longLength: NaN }).longLength).toBe(15);
+  });
+
+  it('fills in missing keys from defaults', () => {
+    expect(sanitizeSettings({}).focusLength).toBe(25);
+  });
+
+  it('preserves a valid in-range value', () => {
+    expect(sanitizeSettings({ focusLength: 40 }).focusLength).toBe(40);
   });
 });
 

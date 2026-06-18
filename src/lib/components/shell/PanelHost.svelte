@@ -1,21 +1,27 @@
 <script lang="ts">
   import type { Component } from 'svelte';
   import { fade, fly } from 'svelte/transition';
-  import { ui, PANEL_META, type PanelType } from '$lib/stores/ui.svelte';
-  import { timer, MODE_CONFIG } from '$lib/stores/timer.svelte';
+  import { ui } from '$lib/stores/ui.svelte';
+  import type { PanelType } from '$lib/types';
+  import { PANEL_META } from '$lib/config/panels';
+  import { timer } from '$lib/stores/timer.svelte';
+  import { MODE_CONFIG } from '$lib/config/modes';
   import { analytics } from '$lib/stores/analytics.svelte';
   import { exportToCSV, exportToJSON, downloadFile } from '$lib/utils/export-utils';
+  import { parseSessionsImport } from '$lib/utils/import-utils';
+  import { toast } from 'svelte-sonner';
   import { X, ListTodo, ChartColumn, Volume2, Palette, Settings2, Play, Pause } from '@lucide/svelte';
   import { Button } from '$lib/components/ui/button';
-  import TaskList from './TaskList.svelte';
-  import PomodoroStats from './PomodoroStats.svelte';
-  import HeatmapCalendar from './HeatmapCalendar.svelte';
-  import ProductiveHours from './ProductiveHours.svelte';
-  import SoundSelector from './SoundSelector.svelte';
-  import PresetSelector from './PresetSelector.svelte';
-  import ThemePicker from './ThemePicker.svelte';
-  import Preferences from './Preferences.svelte';
-  import ShortcutEditor from './ShortcutEditor.svelte';
+  import { trapFocus } from '$lib/actions/focus-trap';
+  import TaskList from '../tasks/TaskList.svelte';
+  import PomodoroStats from '../stats/PomodoroStats.svelte';
+  import HeatmapCalendar from '../stats/HeatmapCalendar.svelte';
+  import ProductiveHours from '../stats/ProductiveHours.svelte';
+  import SoundSelector from '../settings/SoundSelector.svelte';
+  import PresetSelector from '../settings/PresetSelector.svelte';
+  import ThemePicker from '../settings/ThemePicker.svelte';
+  import Preferences from '../settings/Preferences.svelte';
+  import ShortcutEditor from '../settings/ShortcutEditor.svelte';
 
   const NAV: { id: PanelType; label: string; icon: Component }[] = [
     { id: 'tasks', label: 'Tasks', icon: ListTodo },
@@ -32,11 +38,6 @@
     if (event.key === 'Escape' && ui.activePanel) ui.closePanel();
   }
 
-  // Move keyboard focus into the workspace when it opens.
-  function autofocus(node: HTMLElement) {
-    node.focus();
-  }
-
   function stamp(): string {
     return new Date().toISOString().split('T')[0];
   }
@@ -45,6 +46,27 @@
   }
   function exportJSON(): void {
     downloadFile(exportToJSON(analytics.sessions), `aestoti-sessions-${stamp()}.json`, 'application/json');
+  }
+
+  let fileInput = $state<HTMLInputElement>();
+  async function importJSON(event: Event): Promise<void> {
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const sessions = parseSessionsImport(await file.text());
+      const added = analytics.importSessions(sessions);
+      const skipped = sessions.length - added;
+      toast.success(`Imported ${added} session${added === 1 ? '' : 's'}`, {
+        description: skipped > 0 ? `${skipped} already present, skipped.` : undefined
+      });
+    } catch (e) {
+      toast.error('Import failed', {
+        description: e instanceof Error ? e.message : 'Could not read that file.'
+      });
+    } finally {
+      input.value = ''; // let the same file be re-selected later
+    }
   }
 </script>
 
@@ -55,8 +77,10 @@
     class="fixed inset-0 z-40 bg-background"
     role="dialog"
     aria-modal="true"
+    tabindex="-1"
     aria-label="{meta?.title ?? 'Workspace'} panel"
     transition:fade={{ duration: 140 }}
+    use:trapFocus
   >
     <div class="flex h-svh flex-col" in:fly={{ y: 14, duration: 260 }}>
       <!-- header: wordmark · live timer · close -->
@@ -77,7 +101,6 @@
             <span class="hidden text-xs text-muted-foreground sm:inline">{MODE_CONFIG[timer.state.currentMode].title}</span>
           </button>
           <button
-            use:autofocus
             onclick={() => ui.closePanel()}
             class="grid size-9 place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
             aria-label="Back to timer"
@@ -139,7 +162,15 @@
                   <PomodoroStats />
                   <HeatmapCalendar />
                   <ProductiveHours />
-                  <div class="flex justify-end gap-2 border-t border-border pt-6">
+                  <div class="flex flex-wrap justify-end gap-2 border-t border-border pt-6">
+                    <input
+                      bind:this={fileInput}
+                      type="file"
+                      accept="application/json,.json"
+                      class="hidden"
+                      onchange={importJSON}
+                    />
+                    <Button variant="outline" size="sm" onclick={() => fileInput?.click()}>Import JSON</Button>
                     <Button variant="outline" size="sm" onclick={exportCSV}>Export CSV</Button>
                     <Button variant="outline" size="sm" onclick={exportJSON}>Export JSON</Button>
                   </div>

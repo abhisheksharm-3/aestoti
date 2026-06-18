@@ -3,8 +3,8 @@
   import { ModeWatcher, toggleMode } from 'mode-watcher';
   import { Toaster } from '$lib/components/ui/sonner';
   import { ui } from '$lib/stores/ui.svelte';
-  import CommandPalette from '$lib/components/CommandPalette.svelte';
-  import PanelHost from '$lib/components/PanelHost.svelte';
+  import CommandPalette from '$lib/components/shell/CommandPalette.svelte';
+  import PanelHost from '$lib/components/shell/PanelHost.svelte';
   import { Command, SunMoon, Settings2 } from '@lucide/svelte';
   import type { Snippet } from 'svelte';
 

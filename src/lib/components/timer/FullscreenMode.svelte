@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { timer, MODE_CONFIG } from '$lib/stores/timer.svelte';
+  import { timer } from '$lib/stores/timer.svelte';
+  import { MODE_CONFIG } from '$lib/config/modes';
   import { Minimize2, Play, Pause, SkipForward } from '@lucide/svelte';
 
   let { onExit }: { onExit: () => void } = $props();

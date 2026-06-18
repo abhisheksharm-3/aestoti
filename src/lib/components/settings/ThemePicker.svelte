@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { themes, THEMES } from '$lib/stores/themes.svelte';
+  import { themes } from '$lib/stores/themes.svelte';
+  import { THEMES } from '$lib/config/themes';
 </script>
 
 <div class="space-y-3">

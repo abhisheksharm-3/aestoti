@@ -1,12 +1,34 @@
 import { browser } from '$app/environment';
 import { settings } from './settings.svelte';
+import { writeStorage } from '$lib/utils/storage';
 import type { PomodoroModeType, TimerStateType, SessionCompleteCallbackType } from '$lib/types';
 
-export const MODE_CONFIG = {
-  focus: { title: 'Focus', color: 'focus' },
-  shortBreak: { title: 'Short Break', color: 'break' },
-  longBreak: { title: 'Long Break', color: 'break' }
-} as const;
+const STORAGE_KEY = 'aestoti_timer';
+
+/** Serializable timer state, persisted so a reload can resume a live session. */
+export type TimerSnapshot = {
+  currentMode: PomodoroModeType;
+  focusSessionCount: number;
+  isRunning: boolean;
+  deadline: number | null;
+  modeStartTime: string | null;
+};
+
+/**
+ * Decide what to do with a persisted snapshot on load. Pure so it can be tested
+ * without a browser: resume only a session that was running and whose absolute
+ * deadline is still in the future; otherwise the caller resets the mode.
+ */
+export function computeTimerRecovery(
+  snap: TimerSnapshot,
+  nowMs: number
+): { resume: boolean; remainingSeconds: number } | null {
+  if (!snap.isRunning || snap.deadline == null) return null;
+  const remaining = Math.round((snap.deadline - nowMs) / 1000);
+  return remaining > 0
+    ? { resume: true, remainingSeconds: remaining }
+    : { resume: false, remainingSeconds: 0 };
+}
 
 let state = $state<TimerStateType>({
   currentMode: 'focus',
@@ -42,6 +64,44 @@ function stopInterval(): void {
   if (intervalId) { clearInterval(intervalId); intervalId = undefined; }
 }
 
+function persistRunState(): void {
+  if (!browser) return;
+  const snap: TimerSnapshot = {
+    currentMode: state.currentMode,
+    focusSessionCount: state.focusSessionCount,
+    isRunning: state.isRunning,
+    deadline: deadline ?? null,
+    modeStartTime: modeStartTime ? modeStartTime.toISOString() : null
+  };
+  writeStorage(STORAGE_KEY, JSON.stringify(snap));
+}
+
+function restoreRunState(): void {
+  let snap: TimerSnapshot | null = null;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) snap = JSON.parse(stored) as TimerSnapshot;
+  } catch {
+    snap = null;
+  }
+  if (!snap) {
+    state.remainingSeconds = getModeDuration('focus');
+    return;
+  }
+  // Restore mode + cadence so the long-break rhythm survives a reload.
+  state.currentMode = snap.currentMode;
+  state.focusSessionCount = snap.focusSessionCount;
+  const recovery = computeTimerRecovery(snap, Date.now());
+  if (recovery?.resume) {
+    state.remainingSeconds = recovery.remainingSeconds;
+    // Keep the original start time so the resumed session records its true span.
+    modeStartTime = snap.modeStartTime ? new Date(snap.modeStartTime) : new Date();
+    timer.start();
+  } else {
+    state.remainingSeconds = getModeDuration(state.currentMode);
+  }
+}
+
 export const timer = {
   get state() { return state; },
 
@@ -65,7 +125,8 @@ export const timer = {
   },
 
   initialize(): void {
-    state.remainingSeconds = getModeDuration('focus');
+    if (browser) restoreRunState();
+    else state.remainingSeconds = getModeDuration('focus');
     // Guard against re-adding on re-init (client nav / HMR) — see destroy().
     if (browser && !visibilityHandler) {
       visibilityHandler = () => {
@@ -80,6 +141,7 @@ export const timer = {
     if (!modeStartTime) modeStartTime = new Date();
     deadline = Date.now() + state.remainingSeconds * 1000;
     state.isRunning = true;
+    persistRunState();
     // Repaint from the wall clock — do NOT count down a local variable.
     intervalId = window.setInterval(() => {
       // Bail if the mode was already completed (e.g. by resync) and the deadline
@@ -102,6 +164,7 @@ export const timer = {
     stopInterval();
     deadline = undefined;
     state.isRunning = false;
+    persistRunState();
   },
 
   resync(): void {
@@ -133,6 +196,7 @@ export const timer = {
     modeStartTime = undefined;
     deadline = undefined;
     if (settings.current.isAutoTime) this.start();
+    else persistRunState();
   },
 
   skip(): void {
@@ -148,6 +212,7 @@ export const timer = {
     state.remainingSeconds = getModeDuration(nextMode);
     modeStartTime = undefined;
     deadline = undefined;
+    persistRunState();
   },
 
   restart(): void {
@@ -158,6 +223,7 @@ export const timer = {
     modeStartTime = undefined;
     deadline = undefined;
     if (wasRunning) this.start();
+    else persistRunState();
   },
 
   syncWithSettings(): void {

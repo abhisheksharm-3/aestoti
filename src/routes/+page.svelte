@@ -1,6 +1,6 @@
 <script lang="ts">
   import { browser } from '$app/environment';
-  import Pomodoro from '$lib/components/Pomodoro.svelte';
+  import Pomodoro from '$lib/components/timer/Pomodoro.svelte';
 </script>
 
 <div class="flex h-full items-center justify-center">

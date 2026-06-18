@@ -86,6 +86,33 @@ describe('analytics.weeklyFocusScore', () => {
   });
 });
 
+describe('analytics.importSessions', () => {
+  function s(id: string): import('$lib/types').PomodoroSessionType {
+    return {
+      id,
+      mode: 'focus',
+      startTime: '2024-06-17T09:00:00.000Z',
+      endTime: '2024-06-17T09:25:00.000Z',
+      durationSeconds: 1500,
+      isCompleted: true
+    };
+  }
+
+  it('merges new sessions and skips duplicate ids', () => {
+    analytics.importSessions([s('a'), s('b')]);
+    const added = analytics.importSessions([s('b'), s('c')]);
+    expect(added).toBe(1);
+    expect(analytics.sessions.map(x => x.id).sort()).toEqual(['a', 'b', 'c']);
+  });
+
+  it('replaces all sessions when replace=true', () => {
+    analytics.importSessions([s('a'), s('b')]);
+    const count = analytics.importSessions([s('z')], true);
+    expect(count).toBe(1);
+    expect(analytics.sessions.map(x => x.id)).toEqual(['z']);
+  });
+});
+
 describe('analytics.addNote', () => {
   it('sets a note on the specified session', () => {
     const start = todayAt(9);

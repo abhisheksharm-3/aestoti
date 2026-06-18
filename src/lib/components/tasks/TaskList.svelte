@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Check, Trash2, Plus, Play } from '@lucide/svelte';
-  import { tasksStore } from '$lib/stores/tasks.svelte';
+  import { tasks } from '$lib/stores/tasks.svelte';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
 
@@ -8,7 +8,7 @@
 
   function handleAddTask(): void {
     if (newTaskTitle.trim()) {
-      tasksStore.add(newTaskTitle.trim());
+      tasks.add(newTaskTitle.trim());
       newTaskTitle = '';
     }
   }
@@ -18,11 +18,11 @@
   }
 
   function handleSetActive(taskId: string): void {
-    tasksStore.activeTaskId = tasksStore.activeTaskId === taskId ? null : taskId;
+    tasks.activeTaskId = tasks.activeTaskId === taskId ? null : taskId;
   }
 
-  let activeTasks = $derived(tasksStore.tasks.filter(t => !t.isCompleted));
-  let completedTasks = $derived(tasksStore.tasks.filter(t => t.isCompleted));
+  let activeTasks = $derived(tasks.tasks.filter(t => !t.isCompleted));
+  let completedTasks = $derived(tasks.tasks.filter(t => t.isCompleted));
 </script>
 
 <div class="w-full space-y-6">
@@ -47,28 +47,30 @@
     {#each activeTasks as task (task.id)}
       <div class="flex items-center gap-3 py-3 group">
         <button
-          onclick={() => tasksStore.toggle(task.id)}
-          aria-label="Mark task complete"
-          class="h-4 w-4 shrink-0 rounded-sm border transition-colors {tasksStore.activeTaskId === task.id ? 'border-primary' : 'border-border hover:border-foreground/30'}"
+          onclick={() => tasks.toggle(task.id)}
+          role="checkbox"
+          aria-checked={task.isCompleted}
+          aria-label="Mark “{task.title}” complete"
+          class="h-4 w-4 shrink-0 rounded-sm border transition-colors {tasks.activeTaskId === task.id ? 'border-primary' : 'border-border hover:border-foreground/30'}"
         ></button>
-        {#if tasksStore.activeTaskId === task.id}
+        {#if tasks.activeTaskId === task.id}
           <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"></span>
         {/if}
-        <span class="flex-1 text-sm {tasksStore.activeTaskId === task.id ? 'font-medium text-primary' : 'text-foreground'}">{task.title}</span>
+        <span class="flex-1 text-sm {tasks.activeTaskId === task.id ? 'font-medium text-primary' : 'text-foreground'}">{task.title}</span>
         {#if task.focusSessionsSpent > 0}
           <span class="text-xs tabular-nums text-muted-foreground">🍅 {task.focusSessionsSpent}</span>
         {/if}
         <button
           onclick={() => handleSetActive(task.id)}
-          aria-label={tasksStore.activeTaskId === task.id ? 'Currently focusing on this' : 'Focus on this task'}
-          class="p-1 transition-colors {tasksStore.activeTaskId === task.id ? 'text-primary' : 'opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground'}"
+          aria-label={tasks.activeTaskId === task.id ? 'Currently focusing on this' : 'Focus on this task'}
+          class="p-1 transition-colors {tasks.activeTaskId === task.id ? 'text-primary' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-foreground'}"
         >
           <Play class="h-3 w-3" />
         </button>
         <button
-          onclick={() => tasksStore.remove(task.id)}
-          aria-label="Remove task"
-          class="p-1 opacity-0 group-hover:opacity-100 text-muted-foreground transition-opacity hover:text-foreground"
+          onclick={() => tasks.remove(task.id)}
+          aria-label="Remove “{task.title}”"
+          class="p-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground transition-opacity hover:text-foreground"
         >
           <Trash2 class="h-4 w-4" />
         </button>
@@ -87,8 +89,10 @@
         {#each completedTasks as task (task.id)}
           <div class="flex items-center gap-3 py-3 opacity-50">
             <button
-              onclick={() => tasksStore.toggle(task.id)}
-              aria-label="Mark task incomplete"
+              onclick={() => tasks.toggle(task.id)}
+              role="checkbox"
+              aria-checked={task.isCompleted}
+              aria-label="Mark “{task.title}” incomplete"
               class="h-4 w-4 shrink-0 rounded-sm border border-border bg-secondary flex items-center justify-center"
             >
               <Check class="h-2.5 w-2.5 text-foreground" />
@@ -103,7 +107,7 @@
           variant="ghost"
           size="sm"
           class="mt-2 w-full text-muted-foreground"
-          onclick={() => tasksStore.clearCompleted()}
+          onclick={() => tasks.clearCompleted()}
         >
           Clear completed
         </Button>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { trapFocus } from '$lib/actions/focus-trap';
 
   let {
     onSubmit,
@@ -38,8 +39,11 @@
 
 <div
   class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur px-6 py-4"
-  role="region"
+  role="dialog"
+  aria-modal="true"
+  tabindex="-1"
   aria-label="Save a note for the session you just finished"
+  use:trapFocus
 >
   <div class="mx-auto max-w-md space-y-3">
     <div class="flex items-center justify-between">

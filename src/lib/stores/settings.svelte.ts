@@ -22,6 +22,23 @@ const CLAMP_RULES: Partial<Record<keyof SettingsType, [number, number]>> = {
   longBreakInterval: [1, 10]
 };
 
+function clampNumber<K extends keyof SettingsType>(key: K, value: unknown): number {
+  const fallback = DEFAULT_SETTINGS[key] as number;
+  // Non-numeric or NaN/Infinity from tampered/legacy storage → fall back.
+  if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
+  const rule = CLAMP_RULES[key];
+  return rule ? Math.min(rule[1], Math.max(rule[0], value)) : value;
+}
+
+/** Merge over defaults and force every clamped numeric into its valid range. */
+export function sanitizeSettings(raw: Partial<SettingsType>): SettingsType {
+  const merged = { ...DEFAULT_SETTINGS, ...raw };
+  for (const key of Object.keys(CLAMP_RULES) as (keyof SettingsType)[]) {
+    (merged[key] as number) = clampNumber(key, merged[key]);
+  }
+  return merged;
+}
+
 let current = $state<SettingsType>({ ...DEFAULT_SETTINGS });
 
 export const settings = {
@@ -31,19 +48,19 @@ export const settings = {
     if (!browser) return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) current = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) as SettingsType };
+      if (stored) current = sanitizeSettings(JSON.parse(stored) as Partial<SettingsType>);
     } catch {
       current = { ...DEFAULT_SETTINGS };
     }
   },
 
   updateSetting<K extends keyof SettingsType>(key: K, value: SettingsType[K]): void {
-    const clamp = CLAMP_RULES[key];
-    const clamped =
-      clamp && typeof value === 'number'
-        ? (Math.min(clamp[1], Math.max(clamp[0], value)) as SettingsType[K])
-        : value;
-    current = { ...current, [key]: clamped };
+    let next = value;
+    if (typeof value === 'number') {
+      if (!Number.isFinite(value)) return; // ignore NaN/Infinity, keep prior value
+      next = clampNumber(key, value) as SettingsType[K];
+    }
+    current = { ...current, [key]: next };
     writeStorage(STORAGE_KEY, JSON.stringify(current));
   },
 

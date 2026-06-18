@@ -25,9 +25,10 @@ export default defineConfig({
           { src: '/icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
-      // Precache the app shell for instant offline load; the ambient .mp3 files
-      // are large and load on demand rather than bloating the install.
-      workbox: { globPatterns: ['**/*.{js,css,html,png,svg,woff2}'] }
+      // Precache the app shell for instant offline load. The large ambient
+      // .mp3 files in /sounds/ stay on-demand, but the small notification cue
+      // (root-level) is precached so the timer-complete chime works offline.
+      workbox: { globPatterns: ['**/*.{js,css,html,png,svg,woff2}', '**/clock-sound-tick.mp3'] }
     })
   ],
   // @lucide/svelte ships .svelte icon files; Vite must compile them for SSR.

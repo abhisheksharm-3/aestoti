@@ -2,11 +2,12 @@
   import { onMount, onDestroy, untrack } from 'svelte';
   import { Play, Pause, SkipForward, Maximize2 } from '@lucide/svelte';
   import { toast } from 'svelte-sonner';
-  import { timer, MODE_CONFIG } from '$lib/stores/timer.svelte';
+  import { timer } from '$lib/stores/timer.svelte';
+  import { MODE_CONFIG } from '$lib/config/modes';
   import { settings } from '$lib/stores/settings.svelte';
   import { analytics } from '$lib/stores/analytics.svelte';
   import { goals } from '$lib/stores/goals.svelte';
-  import { tasksStore } from '$lib/stores/tasks.svelte';
+  import { tasks } from '$lib/stores/tasks.svelte';
   import { sounds } from '$lib/stores/sounds.svelte';
   import { shortcuts } from '$lib/stores/shortcuts.svelte';
   import { ui } from '$lib/stores/ui.svelte';
@@ -20,7 +21,7 @@
   let previousMode = $state<keyof typeof MODE_CONFIG>('focus');
 
   let currentTitle = $derived(MODE_CONFIG[timer.state.currentMode].title);
-  let activeTask = $derived(tasksStore.tasks.find((t) => t.id === tasksStore.activeTaskId));
+  let activeTask = $derived(tasks.tasks.find((t) => t.id === tasks.activeTaskId));
   let blockMinutes = $derived(Math.round(timer.totalSeconds / 60));
   let elapsedPct = $derived(
     timer.totalSeconds > 0
@@ -50,7 +51,7 @@
   timer.setOnSessionComplete((mode, startTime, endTime, isCompleted) => {
     analytics.recordSession(mode, startTime, endTime, isCompleted);
     if (mode === 'focus' && isCompleted) {
-      if (tasksStore.activeTaskId) tasksStore.incrementSession(tasksStore.activeTaskId);
+      if (tasks.activeTaskId) tasks.incrementSession(tasks.activeTaskId);
       isJournalVisible = true;
     }
   });

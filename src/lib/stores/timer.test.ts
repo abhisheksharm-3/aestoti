@@ -1,6 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { timer } from './timer.svelte';
+import { timer, computeTimerRecovery, type TimerSnapshot } from './timer.svelte';
 import { settings } from './settings.svelte';
+
+const runningSnap: TimerSnapshot = {
+  currentMode: 'focus',
+  focusSessionCount: 0,
+  isRunning: true,
+  deadline: null,
+  modeStartTime: null
+};
 
 function resetToFocus(): void {
   // Drive to a known state: focus mode, not running
@@ -91,6 +99,32 @@ describe('timer.skip', () => {
     timer.skip(); // focus -> shortBreak
     timer.skip(); // shortBreak -> focus
     expect(timer.state.currentMode).toBe('focus');
+  });
+});
+
+describe('computeTimerRecovery (mid-session reload)', () => {
+  it('returns null when the saved timer was not running', () => {
+    expect(computeTimerRecovery({ ...runningSnap, isRunning: false, deadline: 5000 }, 0)).toBeNull();
+  });
+
+  it('returns null when there is no saved deadline', () => {
+    expect(computeTimerRecovery({ ...runningSnap, deadline: null }, 0)).toBeNull();
+  });
+
+  it('resumes with the remaining seconds when the deadline is still in the future', () => {
+    const now = 10_000;
+    expect(computeTimerRecovery({ ...runningSnap, deadline: now + 60_000 }, now)).toEqual({
+      resume: true,
+      remainingSeconds: 60
+    });
+  });
+
+  it('does not resume when the deadline passed while the tab was gone', () => {
+    const now = 100_000;
+    expect(computeTimerRecovery({ ...runningSnap, deadline: now - 5_000 }, now)).toEqual({
+      resume: false,
+      remainingSeconds: 0
+    });
   });
 });
 

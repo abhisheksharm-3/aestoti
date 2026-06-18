@@ -75,6 +75,53 @@ describe('exportToCSV', () => {
   });
 });
 
+describe('exportToCSV escaping & injection safety', () => {
+  it('quotes a note containing a comma so columns are not shifted', () => {
+    const csv = exportToCSV([session({ note: 'focused, then paused' })]);
+    const row = csv.split('\n')[1];
+    expect(row.endsWith('"focused, then paused"')).toBe(true);
+    // still exactly 7 columns when split on top-level commas is not trivial,
+    // but the quoted field must keep its comma inside the quotes
+    expect(row).toContain('"focused, then paused"');
+  });
+
+  it('doubles internal double-quotes and wraps in quotes', () => {
+    const csv = exportToCSV([session({ note: 'said "hi"' })]);
+    const row = csv.split('\n')[1];
+    expect(row.endsWith('"said ""hi"""')).toBe(true);
+  });
+
+  it('quotes a note containing a newline', () => {
+    const csv = exportToCSV([session({ note: 'line1\nline2' })]);
+    expect(csv).toContain('"line1\nline2"');
+  });
+
+  it('neutralizes a formula-injection note starting with =', () => {
+    const csv = exportToCSV([session({ note: '=SUM(A1:A9)' })]);
+    const row = csv.split('\n')[1];
+    // leading = is prefixed with an apostrophe; no comma so no quoting needed
+    expect(row.endsWith("'=SUM(A1:A9)")).toBe(true);
+  });
+
+  it('prefixes AND quotes a formula note that also contains a comma', () => {
+    const csv = exportToCSV([session({ note: '=SUM(A1,A9)' })]);
+    const row = csv.split('\n')[1];
+    expect(row.endsWith('"\'=SUM(A1,A9)"')).toBe(true);
+  });
+
+  it.each(['+1', '-1', '@cmd'])('neutralizes leading formula char in %s', (note) => {
+    const csv = exportToCSV([session({ note })]);
+    const row = csv.split('\n')[1];
+    expect(row.endsWith(`'${note}`)).toBe(true);
+  });
+
+  it('leaves a safe note unquoted (backward compatible)', () => {
+    const csv = exportToCSV([session({ note: 'great session' })]);
+    const row = csv.split('\n')[1];
+    expect(row.endsWith('great session')).toBe(true);
+  });
+});
+
 describe('exportToJSON', () => {
   it('round-trips sessions via JSON.parse', () => {
     const sessions = [

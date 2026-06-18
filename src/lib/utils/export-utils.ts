@@ -1,5 +1,17 @@
 import type { PomodoroSessionType } from '$lib/types';
 
+// A leading =, +, -, @ (or tab/CR) makes a spreadsheet treat the cell as a
+// formula. Prefix with an apostrophe so Excel/Sheets render it as literal text.
+const FORMULA_TRIGGER = /^[=+\-@\t\r]/;
+
+/** RFC-4180-style escaping plus CSV formula-injection neutralization. */
+export function escapeCsvField(value: string): string {
+  let v = value;
+  if (FORMULA_TRIGGER.test(v)) v = `'${v}`;
+  if (/[",\n\r]/.test(v)) v = `"${v.replace(/"/g, '""')}"`;
+  return v;
+}
+
 export function exportToCSV(sessions: PomodoroSessionType[]): string {
   const headers = ['ID', 'Mode', 'Start Time', 'End Time', 'Duration (min)', 'Completed', 'Note'];
   const rows = sessions.map(s => [
@@ -11,7 +23,7 @@ export function exportToCSV(sessions: PomodoroSessionType[]): string {
     s.isCompleted ? 'Yes' : 'No',
     s.note ?? ''
   ]);
-  return [headers, ...rows].map(row => row.join(',')).join('\n');
+  return [headers, ...rows].map(row => row.map(escapeCsvField).join(',')).join('\n');
 }
 
 export function exportToJSON(sessions: PomodoroSessionType[]): string {

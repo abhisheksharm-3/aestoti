@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { presets, DEFAULT_PRESETS } from '$lib/stores/presets.svelte';
+  import { presets } from '$lib/stores/presets.svelte';
+  import { DEFAULT_PRESETS } from '$lib/config/presets';
   import { settings } from '$lib/stores/settings.svelte';
   import { timer } from '$lib/stores/timer.svelte';
 

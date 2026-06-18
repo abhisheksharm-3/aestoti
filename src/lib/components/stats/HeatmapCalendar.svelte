@@ -1,5 +1,6 @@
 <script lang="ts">
   import { analytics } from '$lib/stores/analytics.svelte';
+  import { dayKey } from '$lib/utils/date';
 
   const WEEKS = 16;
   const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
@@ -13,7 +14,7 @@
     sessionsList
       .filter(s => s.mode === 'focus')
       .forEach(s => {
-        const date = s.startTime.split('T')[0];
+        const date = dayKey(s.startTime);
         map.set(date, (map.get(date) ?? 0) + 1);
       });
     return map;
@@ -29,7 +30,7 @@
       for (let day = 0; day < 7; day++) {
         const date = new Date(startDate);
         date.setDate(startDate.getDate() + week * 7 + day);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = dayKey(date);
         weekData.push({ date: dateStr, count: map.get(dateStr) ?? 0 });
       }
       result.push(weekData);
@@ -73,7 +74,9 @@
           {#each week as day}
             <div
               class="w-3 h-3 {getColor(day.count)} transition-opacity"
+              role="img"
               title="{formatDate(day.date)}: {day.count} sessions"
+              aria-label="{formatDate(day.date)}: {day.count} focus session{day.count === 1 ? '' : 's'}"
             ></div>
           {/each}
         </div>

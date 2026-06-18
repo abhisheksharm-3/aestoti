@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { X } from '@lucide/svelte';
   import type { PomodoroModeType } from '$lib/types';
 
@@ -29,7 +30,13 @@
     return list[Math.floor(Math.random() * list.length)];
   }
 
-  let prompt = $derived(pickPrompt(mode));
+  // Pick once per mode change. A $derived here would be impure (Math.random in a
+  // derived re-rolls on unrelated invalidations); an effect keyed on `mode` is stable.
+  // untrack: the initializer intentionally reads `mode` once; the effect owns updates.
+  let prompt = $state(untrack(() => pickPrompt(mode)));
+  $effect(() => {
+    prompt = pickPrompt(mode);
+  });
 </script>
 
 <div class="flex items-center gap-4 border-y border-border py-3">
