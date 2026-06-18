@@ -5,6 +5,25 @@ import { writeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_tasks';
 
+function isValidTask(value: unknown): value is TaskType {
+  if (typeof value !== 'object' || value === null) return false;
+  const t = value as Record<string, unknown>;
+  return (
+    typeof t.id === 'string' &&
+    typeof t.title === 'string' &&
+    typeof t.isCompleted === 'boolean' &&
+    typeof t.createdAt === 'string' &&
+    (t.completedAt === null || typeof t.completedAt === 'string') &&
+    typeof t.focusSessionsSpent === 'number' &&
+    Number.isFinite(t.focusSessionsSpent)
+  );
+}
+
+/** Keep only well-formed tasks from untrusted localStorage. */
+export function sanitizeTasks(raw: unknown): TaskType[] {
+  return Array.isArray(raw) ? raw.filter(isValidTask) : [];
+}
+
 let items = $state<TaskType[]>([]);
 let activeTaskId = $state<string | null>(null);
 
@@ -21,7 +40,7 @@ export const tasks = {
     if (!browser) return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) items = JSON.parse(stored) as TaskType[];
+      if (stored) items = sanitizeTasks(JSON.parse(stored));
     } catch {
       items = [];
     }

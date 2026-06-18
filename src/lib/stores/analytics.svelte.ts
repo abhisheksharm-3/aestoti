@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import type { PomodoroSessionType, AnalyticsSummaryType, PomodoroModeType } from '$lib/types';
 import { generateId } from '$lib/utils/id';
 import { dayKey } from '$lib/utils/date';
+import { parseSessionsImport } from '$lib/utils/import-utils';
 import { writeStorage, removeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_sessions';
@@ -85,7 +86,8 @@ export const analytics = {
     if (!browser) return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) sessions = JSON.parse(stored) as PomodoroSessionType[];
+      // Reuse the import validator so hydrate and import enforce the same shape.
+      if (stored) sessions = parseSessionsImport(stored);
     } catch {
       sessions = [];
     }

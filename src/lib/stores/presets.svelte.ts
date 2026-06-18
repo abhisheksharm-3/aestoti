@@ -11,6 +11,23 @@ type PresetsStateType = {
   activePresetId: string | null;
 };
 
+function isValidPreset(value: unknown): value is TimerPresetType {
+  if (typeof value !== 'object' || value === null) return false;
+  const p = value as Record<string, unknown>;
+  return (
+    typeof p.id === 'string' &&
+    typeof p.name === 'string' &&
+    ['focusLength', 'shortLength', 'longLength', 'longBreakInterval'].every(
+      k => typeof p[k] === 'number' && Number.isFinite(p[k])
+    )
+  );
+}
+
+/** Keep only well-formed custom presets from untrusted localStorage. */
+export function sanitizeCustomPresets(raw: unknown): TimerPresetType[] {
+  return Array.isArray(raw) ? raw.filter(isValidPreset) : [];
+}
+
 let state = $state<PresetsStateType>({ presets: [...DEFAULT_PRESETS], activePresetId: null });
 
 function persist(): void {
@@ -28,12 +45,12 @@ export const presets = {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return;
       const parsed = JSON.parse(stored) as {
-        customPresets?: TimerPresetType[];
-        activePresetId?: string;
+        customPresets?: unknown;
+        activePresetId?: unknown;
       };
       state = {
-        presets: [...DEFAULT_PRESETS, ...(parsed.customPresets ?? [])],
-        activePresetId: parsed.activePresetId ?? null
+        presets: [...DEFAULT_PRESETS, ...sanitizeCustomPresets(parsed.customPresets)],
+        activePresetId: typeof parsed.activePresetId === 'string' ? parsed.activePresetId : null
       };
     } catch {
       state = { presets: [...DEFAULT_PRESETS], activePresetId: null };

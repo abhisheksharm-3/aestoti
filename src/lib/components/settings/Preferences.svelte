@@ -2,6 +2,7 @@
   import { mode, toggleMode } from 'mode-watcher';
   import { settings } from '$lib/stores/settings.svelte';
   import { timer } from '$lib/stores/timer.svelte';
+  import { goals } from '$lib/stores/goals.svelte';
   import { Label } from '$lib/components/ui/label';
   import { Switch } from '$lib/components/ui/switch';
   import { Input } from '$lib/components/ui/input';
@@ -55,6 +56,29 @@
           id="break-prompts"
           checked={settings.current.hasBreakPrompts}
           onclick={() => handleSettingChange('hasBreakPrompts', !settings.current.hasBreakPrompts)}
+        />
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Goal</div>
+    <div class="mt-3 divide-y divide-border">
+      <div class="flex items-center justify-between py-3">
+        <Label for="goal-enabled" class="text-sm text-foreground">Daily Goal</Label>
+        <Switch id="goal-enabled" checked={goals.current.isEnabled} onclick={() => goals.toggle()} />
+      </div>
+      <div class="flex items-center justify-between py-3">
+        <Label for="goal-target" class="text-sm text-foreground">Target Sessions</Label>
+        <Input
+          type="number"
+          min="1"
+          max="24"
+          class="w-20 tabular-nums"
+          id="goal-target"
+          disabled={!goals.current.isEnabled}
+          value={goals.current.targetSessions}
+          onchange={(e) => goals.setTarget(Number(e.currentTarget.value))}
         />
       </div>
     </div>

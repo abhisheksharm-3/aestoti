@@ -27,7 +27,7 @@ export const themes = {
   initialize(): void {
     if (!browser) return;
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) activeThemeId = stored;
+    if (stored && THEMES.some(t => t.id === stored)) activeThemeId = stored;
     // Always apply so the default theme establishes the brand color on first load.
     applyTheme(activeThemeId);
   },

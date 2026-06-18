@@ -10,10 +10,12 @@ import { shortcuts } from './shortcuts.svelte';
 import { ui } from './ui.svelte';
 
 /**
- * Hydrate every store from localStorage. ORDER MATTERS: `settings` must run
- * before `timer`, since the timer reads the persisted mode durations from
- * settings when it computes its initial `remainingSeconds`. Keep this the one
- * place that owns store boot order — call it once on the client.
+ * Hydrate every persisted store from localStorage, in one place. ORDER MATTERS
+ * only for `settings` → `timer`: the timer reads persisted mode durations from
+ * settings when computing its initial `remainingSeconds` (and restoring a
+ * running session). The rest (analytics, tasks, goals, sounds, presets, themes,
+ * shortcuts) are order-independent. `ui` is intentionally excluded — it holds
+ * ephemeral, non-persisted state. Call once on the client.
  */
 export function initializeStores(): void {
   settings.initialize();

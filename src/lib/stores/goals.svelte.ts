@@ -25,7 +25,8 @@ export const goals = {
   },
 
   setTarget(target: number): void {
-    current = { ...current, targetSessions: Math.max(1, target) };
+    if (!Number.isFinite(target)) return; // ignore NaN/Infinity, keep prior value
+    current = { ...current, targetSessions: Math.min(24, Math.max(1, target)) };
     persist();
   },
 

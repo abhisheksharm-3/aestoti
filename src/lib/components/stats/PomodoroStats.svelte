@@ -1,12 +1,7 @@
 <script lang="ts">
   import StatCard from './StatCard.svelte';
   import { analytics } from '$lib/stores/analytics.svelte';
-
-  function formatTime(minutes: number): string {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  }
+  import { formatDuration } from '$lib/utils/format';
 </script>
 
 <div class="space-y-8">
@@ -20,9 +15,9 @@
   <!-- stat grid -->
   <div class="grid grid-cols-2 gap-x-12 gap-y-8 sm:grid-cols-3">
     <StatCard title="Total Sessions" value={analytics.summary.totalSessions.toString()} />
-    <StatCard title="Total Focus Time" value={formatTime(analytics.summary.totalFocusMinutes)} />
-    <StatCard title="Average Session" value={formatTime(analytics.summary.averageSessionMinutes)} />
-    <StatCard title="Longest Session" value={formatTime(analytics.summary.longestSessionMinutes)} />
+    <StatCard title="Total Focus Time" value={formatDuration(analytics.summary.totalFocusMinutes)} />
+    <StatCard title="Average Session" value={formatDuration(analytics.summary.averageSessionMinutes)} />
+    <StatCard title="Longest Session" value={formatDuration(analytics.summary.longestSessionMinutes)} />
     <StatCard title="Sessions Today" value={analytics.summary.sessionsToday.toString()} />
     <StatCard title="Current Streak" value={`${analytics.summary.currentStreak} days`} />
   </div>

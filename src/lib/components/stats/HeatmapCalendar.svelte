@@ -11,7 +11,7 @@
   let dailyMap = $derived(buildDailyMap(analytics.sessions));
   let columns = $derived(buildColumns(dailyMap));
   let monthLabels = $derived(buildMonthLabels(columns));
-  let totalSessions = $derived(analytics.sessions.filter(s => s.mode === 'focus').length);
+  let totalSessions = $derived([...dailyMap.values()].reduce((sum, c) => sum + c, 0));
 
   function buildDailyMap(sessionsList: typeof analytics.sessions): Map<string, number> {
     const map = new Map<string, number>();

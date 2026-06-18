@@ -12,6 +12,7 @@
   import { shortcuts } from '$lib/stores/shortcuts.svelte';
   import { ui } from '$lib/stores/ui.svelte';
   import { notifications } from '$lib/services/notifications';
+  import { formatDuration } from '$lib/utils/format';
   import FullscreenMode from './FullscreenMode.svelte';
   import SessionJournal from './SessionJournal.svelte';
   import BreakPrompt from './BreakPrompt.svelte';
@@ -41,12 +42,6 @@
         .reduce((sum, s) => sum + s.durationSeconds, 0) / 60
     );
   });
-
-  function formatTime(minutes: number): string {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return h > 0 ? `${h}h ${m}m` : `${m}m`;
-  }
 
   // Wire session-complete callback once at component init
   timer.setOnSessionComplete((mode, startTime, endTime, isCompleted) => {
@@ -158,10 +153,12 @@
     <div class="flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
       <span class="text-foreground">{currentTitle}</span>
       <span class="h-px flex-1 bg-border"></span>
-      <span class="tabular-nums">
-        Session {String(Math.min(sessionsToday + 1, goalTarget)).padStart(2, '0')} / {String(goalTarget).padStart(2, '0')}
-      </span>
-      <span class="hidden h-px w-12 bg-border sm:block"></span>
+      {#if goals.current.isEnabled}
+        <span class="tabular-nums">
+          Session {String(Math.min(sessionsToday + 1, goalTarget)).padStart(2, '0')} / {String(goalTarget).padStart(2, '0')}
+        </span>
+        <span class="hidden h-px w-12 bg-border sm:block"></span>
+      {/if}
       <span class="hidden tabular-nums sm:inline">{blockMinutes} min block</span>
     </div>
 
@@ -212,7 +209,7 @@
         <button onclick={() => ui.openPanel('stats')} class="group text-left">
           <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Today</div>
           <div class="mt-1.5 text-[15px] font-medium tabular-nums text-foreground transition-colors group-hover:text-primary">
-            {formatTime(todayMinutes)} · {sessionsToday} sessions · {streak}d streak
+            {formatDuration(todayMinutes)} · {sessionsToday} sessions · {streak}d streak
           </div>
         </button>
       </div>
