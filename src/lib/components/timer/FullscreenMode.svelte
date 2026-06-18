@@ -2,12 +2,30 @@
   import { onMount, onDestroy } from 'svelte';
   import { timer } from '$lib/stores/timer.svelte';
   import { MODE_CONFIG } from '$lib/config/modes';
-  import { Minimize2, Play, Pause, SkipForward } from '@lucide/svelte';
+  import { Minimize2, Play, Pause, SkipForward, Clock } from '@lucide/svelte';
   import SoundQuickPicker from './SoundQuickPicker.svelte';
 
   let { onExit }: { onExit: () => void } = $props();
 
   let containerEl = $state<HTMLDivElement | undefined>(undefined);
+
+  // Wall-clock mode: swap the countdown for the current time of day. The timer
+  // keeps running underneath; this only changes what the big display shows.
+  let clockMode = $state(false);
+  let showSeconds = $state(false);
+  let now = $state(new Date());
+  let clock = $derived({
+    h: String(now.getHours()).padStart(2, '0'),
+    m: String(now.getMinutes()).padStart(2, '0'),
+    s: String(now.getSeconds()).padStart(2, '0')
+  });
+
+  $effect(() => {
+    if (!clockMode) return;
+    now = new Date();
+    const id = setInterval(() => (now = new Date()), 1000);
+    return () => clearInterval(id);
+  });
 
   let currentTitle = $derived(MODE_CONFIG[timer.state.currentMode].title);
   let blockMinutes = $derived(Math.round(timer.totalSeconds / 60));
@@ -51,7 +69,7 @@
 >
   <!-- eyebrow -->
   <div class="flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:gap-5 sm:text-xs">
-    <span class="text-foreground">{currentTitle}</span>
+    <span class="text-foreground">{clockMode ? 'Clock' : currentTitle}</span>
     <span class="h-px flex-1 bg-border"></span>
     <span class="tabular-nums">{blockMinutes} min block</span>
     <button
@@ -68,11 +86,18 @@
   <div class="flex flex-1 items-center justify-center">
     <div
       class="font-semibold leading-[0.78] tracking-[-0.045em] tabular-nums select-none"
-      style="font-size: clamp(5rem, 26vw, 24rem)"
+      style="font-size: {clockMode && showSeconds ? 'clamp(3.5rem, 18vw, 17rem)' : 'clamp(5rem, 26vw, 24rem)'}"
     >
-      <span>{timer.formattedTime.minutes}</span><span class="text-muted-foreground/30">:</span><span
-        class="text-primary">{timer.formattedTime.seconds}</span
-      >
+      {#if clockMode}
+        <span>{clock.h}</span><span class="text-muted-foreground/30">:</span><span class="text-primary">{clock.m}</span
+        >{#if showSeconds}<span class="text-muted-foreground/30">:</span><span class="text-muted-foreground/70"
+            >{clock.s}</span
+          >{/if}
+      {:else}
+        <span>{timer.formattedTime.minutes}</span><span class="text-muted-foreground/30">:</span><span
+          class="text-primary">{timer.formattedTime.seconds}</span
+        >
+      {/if}
     </div>
   </div>
 
@@ -90,12 +115,34 @@
 
   <!-- transport + hint -->
   <div class="mt-7 flex items-center justify-between gap-4">
-    <div class="hidden font-mono text-xs tracking-wide text-muted-foreground sm:block">
-      <kbd class="rounded bg-secondary px-1.5 py-0.5">Esc</kbd> exit
-      <span class="mx-2 text-muted-foreground/50">·</span>
-      <kbd class="rounded bg-secondary px-1.5 py-0.5">Space</kbd> play / pause
+    <div class="flex items-center gap-4">
+      <div class="hidden font-mono text-xs tracking-wide text-muted-foreground sm:block">
+        <kbd class="rounded bg-secondary px-1.5 py-0.5">Esc</kbd> exit
+        <span class="mx-2 text-muted-foreground/50">·</span>
+        <kbd class="rounded bg-secondary px-1.5 py-0.5">Space</kbd> play / pause
+      </div>
+      {#if clockMode}
+        <button
+          onclick={() => (showSeconds = !showSeconds)}
+          aria-pressed={showSeconds}
+          class="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Seconds <span class={showSeconds ? 'text-primary' : 'text-muted-foreground/50'}>{showSeconds ? 'on' : 'off'}</span>
+        </button>
+      {/if}
     </div>
-    <div class="flex flex-1 items-center justify-end gap-3">
+    <div class="flex items-center justify-end gap-3">
+      <button
+        onclick={() => (clockMode = !clockMode)}
+        aria-pressed={clockMode}
+        aria-label={clockMode ? 'Show timer' : 'Show clock'}
+        title="Clock"
+        class="grid size-12 place-items-center rounded-md border border-border transition-colors hover:text-foreground {clockMode
+          ? 'text-primary'
+          : 'text-muted-foreground'}"
+      >
+        <Clock class="size-5" />
+      </button>
       <SoundQuickPicker />
       <button
         onclick={() => timer.skip()}
