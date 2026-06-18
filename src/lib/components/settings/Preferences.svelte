@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mode, toggleMode } from 'mode-watcher';
+  import { mode, setMode } from 'mode-watcher';
   import { settings } from '$lib/stores/settings.svelte';
   import { timer } from '$lib/stores/timer.svelte';
   import { goals } from '$lib/stores/goals.svelte';
@@ -18,114 +18,150 @@
   }
 </script>
 
-<div class="space-y-10">
+{#snippet field(title: string, hint: string, htmlFor: string, dim = false)}
+  <div class="min-w-0 {dim ? 'opacity-45' : ''}">
+    <Label for={htmlFor} class="text-[15px] font-medium text-foreground">{title}</Label>
+    <div class="mt-1 font-mono text-[10px] leading-relaxed tracking-wide text-muted-foreground">{hint}</div>
+  </div>
+{/snippet}
+
+<div class="space-y-12">
   <section>
-    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Behavior</div>
-    <div class="mt-3 divide-y divide-border">
-      <div class="flex items-center justify-between py-3">
-        <Label for="mode" class="text-sm text-foreground">Dark Mode</Label>
-        <Switch id="mode" onclick={toggleMode} checked={isDarkMode} />
+    <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Behavior</div>
+    <div class="mt-4 divide-y divide-border/70">
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Dark Mode', 'Use a dark interface.', 'mode')}
+        <Switch id="mode" checked={isDarkMode} onCheckedChange={(v) => setMode(v ? 'dark' : 'light')} />
       </div>
-      <div class="flex items-center justify-between py-3">
-        <Label for="timer-auto" class="text-sm text-foreground">Auto Resume Timer</Label>
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Auto Resume Timer', 'Start the next block automatically.', 'timer-auto')}
         <Switch
           id="timer-auto"
           checked={settings.current.isAutoTime}
-          onclick={() => handleSettingChange('isAutoTime', !settings.current.isAutoTime)}
+          onCheckedChange={(v) => handleSettingChange('isAutoTime', v)}
         />
       </div>
-      <div class="flex items-center justify-between py-3">
-        <Label for="sound" class="text-sm text-foreground">Sound</Label>
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Sound', 'Play ambient audio while focusing.', 'sound')}
         <Switch
           id="sound"
           checked={settings.current.hasSound}
-          onclick={() => handleSettingChange('hasSound', !settings.current.hasSound)}
+          onCheckedChange={(v) => handleSettingChange('hasSound', v)}
         />
       </div>
-      <div class="flex items-center justify-between py-3">
-        <Label for="notification" class="text-sm text-foreground">Notifications</Label>
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Notifications', 'Alert me when a block ends.', 'notification')}
         <Switch
           id="notification"
           checked={settings.current.hasNotification}
-          onclick={() => handleSettingChange('hasNotification', !settings.current.hasNotification)}
+          onCheckedChange={(v) => handleSettingChange('hasNotification', v)}
         />
       </div>
-      <div class="flex items-center justify-between py-3">
-        <Label for="break-prompts" class="text-sm text-foreground">Break Prompts</Label>
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Break Prompts', 'Suggest a way to rest on breaks.', 'break-prompts')}
         <Switch
           id="break-prompts"
           checked={settings.current.hasBreakPrompts}
-          onclick={() => handleSettingChange('hasBreakPrompts', !settings.current.hasBreakPrompts)}
+          onCheckedChange={(v) => handleSettingChange('hasBreakPrompts', v)}
         />
       </div>
     </div>
   </section>
 
   <section>
-    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Goal</div>
-    <div class="mt-3 divide-y divide-border">
-      <div class="flex items-center justify-between py-3">
-        <Label for="goal-enabled" class="text-sm text-foreground">Daily Goal</Label>
-        <Switch id="goal-enabled" checked={goals.current.isEnabled} onclick={() => goals.toggle()} />
-      </div>
-      <div class="flex items-center justify-between py-3">
-        <Label for="goal-target" class="text-sm text-foreground">Target Sessions</Label>
-        <Input
-          type="number"
-          min="1"
-          max="24"
-          class="w-20 tabular-nums"
-          id="goal-target"
-          disabled={!goals.current.isEnabled}
-          value={goals.current.targetSessions}
-          onchange={(e) => goals.setTarget(Number(e.currentTarget.value))}
+    <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Goal</div>
+    <div class="mt-4 divide-y divide-border/70">
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Daily Goal', 'Aim for a number of sessions each day.', 'goal-enabled')}
+        <Switch
+          id="goal-enabled"
+          checked={goals.current.isEnabled}
+          onCheckedChange={(v) => {
+            if (v !== goals.current.isEnabled) goals.toggle();
+          }}
         />
+      </div>
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field("Target Sessions", "Counts toward today's goal.", 'goal-target', !goals.current.isEnabled)}
+        <div class="flex items-center gap-2.5">
+          <Input
+            type="number"
+            min="1"
+            max="24"
+            class="h-9 w-16 rounded-md text-right tabular-nums"
+            id="goal-target"
+            disabled={!goals.current.isEnabled}
+            value={goals.current.targetSessions}
+            onchange={(e) => goals.setTarget(Number(e.currentTarget.value))}
+          />
+          <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">/ day</span>
+        </div>
       </div>
     </div>
   </section>
 
   <section>
-    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Durations</div>
-    <div class="mt-3 divide-y divide-border">
-      <div class="flex items-center justify-between py-3">
-        <Label for="focus-length" class="text-sm text-foreground">Focus Length</Label>
-        <Input
-          type="number"
-          class="w-20 tabular-nums"
-          id="focus-length"
-          value={settings.current.focusLength}
-          onchange={(e) => handleSettingChange('focusLength', Number(e.currentTarget.value))}
-        />
+    <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Durations</div>
+    <div class="mt-4 divide-y divide-border/70">
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Focus Length', 'Length of one focus block.', 'focus-length')}
+        <div class="flex items-center gap-2.5">
+          <Input
+            type="number"
+            min="1"
+            max="180"
+            class="h-9 w-16 rounded-md text-right tabular-nums"
+            id="focus-length"
+            value={settings.current.focusLength}
+            onchange={(e) => handleSettingChange('focusLength', Number(e.currentTarget.value))}
+          />
+          <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">min</span>
+        </div>
       </div>
-      <div class="flex items-center justify-between py-3">
-        <Label for="long-break-interval" class="text-sm text-foreground">Pomodoros Until Long Break</Label>
-        <Input
-          type="number"
-          class="w-20 tabular-nums"
-          id="long-break-interval"
-          value={settings.current.longBreakInterval}
-          onchange={(e) => handleSettingChange('longBreakInterval', Number(e.currentTarget.value))}
-        />
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Pomodoros Until Long Break', 'Focus blocks before a long break.', 'long-break-interval')}
+        <div class="flex items-center gap-2.5">
+          <Input
+            type="number"
+            min="1"
+            max="10"
+            class="h-9 w-16 rounded-md text-right tabular-nums"
+            id="long-break-interval"
+            value={settings.current.longBreakInterval}
+            onchange={(e) => handleSettingChange('longBreakInterval', Number(e.currentTarget.value))}
+          />
+          <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">blocks</span>
+        </div>
       </div>
-      <div class="flex items-center justify-between py-3">
-        <Label for="short-length" class="text-sm text-foreground">Short Break Length</Label>
-        <Input
-          type="number"
-          class="w-20 tabular-nums"
-          id="short-length"
-          value={settings.current.shortLength}
-          onchange={(e) => handleSettingChange('shortLength', Number(e.currentTarget.value))}
-        />
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Short Break Length', 'Quick breather between blocks.', 'short-length')}
+        <div class="flex items-center gap-2.5">
+          <Input
+            type="number"
+            min="1"
+            max="60"
+            class="h-9 w-16 rounded-md text-right tabular-nums"
+            id="short-length"
+            value={settings.current.shortLength}
+            onchange={(e) => handleSettingChange('shortLength', Number(e.currentTarget.value))}
+          />
+          <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">min</span>
+        </div>
       </div>
-      <div class="flex items-center justify-between py-3">
-        <Label for="long-length" class="text-sm text-foreground">Long Break Length</Label>
-        <Input
-          type="number"
-          class="w-20 tabular-nums"
-          id="long-length"
-          value={settings.current.longLength}
-          onchange={(e) => handleSettingChange('longLength', Number(e.currentTarget.value))}
-        />
+      <div class="flex items-center justify-between gap-8 py-4">
+        {@render field('Long Break Length', 'A longer rest after several blocks.', 'long-length')}
+        <div class="flex items-center gap-2.5">
+          <Input
+            type="number"
+            min="1"
+            max="120"
+            class="h-9 w-16 rounded-md text-right tabular-nums"
+            id="long-length"
+            value={settings.current.longLength}
+            onchange={(e) => handleSettingChange('longLength', Number(e.currentTarget.value))}
+          />
+          <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">min</span>
+        </div>
       </div>
     </div>
   </section>

@@ -7,9 +7,9 @@
 <div class="space-y-8">
   <!-- prominent 7-day score -->
   <div>
-    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">7-DAY SCORE</div>
+    <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">7-DAY SCORE</div>
     <div class="mt-3 text-5xl font-semibold tabular-nums text-primary">{analytics.weeklyFocusScore}</div>
-    <p class="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Stored locally on this device.</p>
+    <p class="mt-2 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Stored locally on this device.</p>
   </div>
 
   <!-- stat grid -->
@@ -23,7 +23,7 @@
   </div>
 
   <!-- secondary stats row -->
-  <div class="border-t border-border pt-6 flex flex-wrap gap-x-12 gap-y-4">
+  <div class="border-t border-border/70 pt-6 flex flex-wrap gap-x-12 gap-y-4">
     <StatCard title="Sessions This Week" value={analytics.summary.sessionsThisWeek.toString()} />
     <StatCard title="Total Days Tracked" value={analytics.summary.totalDays.toString()} />
   </div>

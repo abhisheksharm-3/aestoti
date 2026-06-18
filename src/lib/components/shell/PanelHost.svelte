@@ -147,7 +147,7 @@
           </div>
 
           <div class="hide-scrollbar flex-1 overflow-y-auto">
-            <div class="mx-auto w-full max-w-3xl px-6 py-10 sm:px-10">
+            <div class="mx-auto w-full max-w-2xl px-6 py-10 sm:px-10">
               {#if meta}
                 <header class="mb-9">
                   <div class="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{meta.description}</div>

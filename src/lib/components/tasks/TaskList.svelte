@@ -25,7 +25,7 @@
   let completedTasks = $derived(tasks.tasks.filter(t => t.isCompleted));
 </script>
 
-<div class="w-full space-y-6">
+<div class="space-y-8">
   <div class="flex gap-2">
     <Input
       type="text"
@@ -43,7 +43,9 @@
     </button>
   </div>
 
-  <div class="divide-y divide-border">
+  <section class="space-y-3">
+    <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Active</div>
+    <div class="divide-y divide-border/70">
     {#each activeTasks as task (task.id)}
       <div class="flex items-center gap-3 py-3 group">
         <button
@@ -78,14 +80,15 @@
     {:else}
       <p class="py-4 text-sm text-muted-foreground">No active tasks. Add one above.</p>
     {/each}
-  </div>
+    </div>
+  </section>
 
   {#if completedTasks.length > 0}
     <details>
-      <summary class="cursor-pointer font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">
+      <summary class="cursor-pointer font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground hover:text-foreground">
         Completed ({completedTasks.length})
       </summary>
-      <div class="mt-3 divide-y divide-border">
+      <div class="mt-3 divide-y divide-border/70">
         {#each completedTasks as task (task.id)}
           <div class="flex items-center gap-3 py-3 opacity-50">
             <button

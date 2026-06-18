@@ -23,7 +23,7 @@
 
 <div class="space-y-8">
   <section class="space-y-3">
-    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Ambient sound</div>
+    <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Ambient sound</div>
     <div class="grid grid-cols-3 gap-2">
       {#each SOUND_PRESETS as preset (preset.id)}
         <button
@@ -44,7 +44,7 @@
 
   <section class="space-y-3">
     <div class="flex items-center gap-2">
-      <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Radio</div>
+      <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Radio</div>
       <span class="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
         <span class="size-1.5 rounded-full bg-primary"></span>live
       </span>
@@ -69,9 +69,9 @@
   </section>
 
   {#if hasSound}
-    <section class="space-y-4 border-t border-border pt-6">
+    <section class="space-y-4 border-t border-border/70 pt-6">
       <div class="flex items-center justify-between">
-        <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Preview</div>
+        <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Preview</div>
         <button
           onclick={togglePreview}
           class="inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-foreground/30"
@@ -85,7 +85,7 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Volume</span>
+        <span class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Volume</span>
         <input
           type="range"
           min="0"

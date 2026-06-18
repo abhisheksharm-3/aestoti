@@ -13,7 +13,7 @@
 
 <div class="space-y-4">
   <div class="flex items-end justify-between">
-    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Productive Hours</div>
+    <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Productive Hours</div>
     <span class="font-mono text-[10px] text-muted-foreground">
       Peak: <span class="text-primary">{formatHour(bestHour)}</span>
     </span>

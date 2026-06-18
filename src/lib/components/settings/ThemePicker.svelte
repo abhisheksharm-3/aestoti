@@ -4,7 +4,7 @@
 </script>
 
 <div class="space-y-3">
-  <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Color</div>
+  <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Color</div>
 
   <div class="mt-3 grid grid-cols-3 gap-2">
     {#each THEMES as theme (theme.id)}

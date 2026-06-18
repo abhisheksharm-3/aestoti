@@ -88,7 +88,7 @@
 
 <div class="space-y-4">
   <div>
-    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Focus Activity</div>
+    <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Focus Activity</div>
     <p class="mt-1 font-mono text-[10px] text-muted-foreground tabular-nums">{totalSessions} sessions recorded</p>
   </div>
 
@@ -139,7 +139,7 @@
   </div>
 
   <div class="flex items-center gap-2">
-    <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Less</span>
+    <span class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Less</span>
     <div class="flex gap-1">
       <div class="size-3 rounded-[3px] bg-foreground/[0.06]"></div>
       <div class="size-3 rounded-[3px] bg-primary/30"></div>
@@ -147,6 +147,6 @@
       <div class="size-3 rounded-[3px] bg-primary/80"></div>
       <div class="size-3 rounded-[3px] bg-primary"></div>
     </div>
-    <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">More</span>
+    <span class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">More</span>
   </div>
 </div>

@@ -17,7 +17,7 @@
 </script>
 
 <div class="space-y-3">
-  <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Timer Presets</div>
+  <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Timer Presets</div>
 
   <div class="mt-3 grid grid-cols-2 gap-2">
     {#each presets.state.presets as preset (preset.id)}

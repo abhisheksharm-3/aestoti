@@ -34,14 +34,14 @@
 
 <div class="space-y-4">
   <div class="flex items-center justify-between">
-    <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Keyboard Shortcuts</div>
+    <div class="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Keyboard Shortcuts</div>
     <Button variant="ghost" size="sm" onclick={() => shortcuts.reset()}>Reset</Button>
   </div>
 
-  <div class="divide-y divide-border">
+  <div class="divide-y divide-border/70">
     {#each shortcuts.current as shortcut (shortcut.action)}
-      <div class="flex items-center justify-between py-3">
-        <span class="text-sm text-foreground">{SHORTCUT_LABELS[shortcut.action]}</span>
+      <div class="flex items-center justify-between gap-8 py-4">
+        <span class="text-[15px] font-medium text-foreground">{SHORTCUT_LABELS[shortcut.action]}</span>
         <button
           onclick={() => handleStartRecording(shortcut.action)}
           class="min-w-20 rounded-md border px-3 py-1 text-center font-mono text-[11px] transition-colors {recordingAction === shortcut.action

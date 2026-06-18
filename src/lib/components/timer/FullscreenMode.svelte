@@ -3,6 +3,7 @@
   import { timer } from '$lib/stores/timer.svelte';
   import { MODE_CONFIG } from '$lib/config/modes';
   import { Minimize2, Play, Pause, SkipForward } from '@lucide/svelte';
+  import SoundQuickPicker from './SoundQuickPicker.svelte';
 
   let { onExit }: { onExit: () => void } = $props();
 
@@ -95,6 +96,7 @@
       <kbd class="rounded bg-secondary px-1.5 py-0.5">Space</kbd> play / pause
     </div>
     <div class="flex flex-1 items-center justify-end gap-3">
+      <SoundQuickPicker />
       <button
         onclick={() => timer.skip()}
         class="grid size-12 place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
