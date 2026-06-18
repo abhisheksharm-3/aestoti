@@ -1,9 +1,17 @@
 import { browser } from '$app/environment';
+import { toast } from 'svelte-sonner';
 import { SOUND_PRESETS, NOTIFICATION_SOUNDS } from '$lib/config/sounds';
+import { LOFI_STATIONS } from '$lib/config/lofi';
 import { audioEngine } from '$lib/services/audio';
 import { writeStorage } from '$lib/utils/storage';
+import type { SoundPresetType } from '$lib/types';
 
 const STORAGE_KEY = 'aestoti_sounds';
+
+/** Resolve an ambient id to its preset — a built-in sound or a lofi station. */
+function findSource(id: string): SoundPresetType | undefined {
+  return SOUND_PRESETS.find(p => p.id === id) ?? LOFI_STATIONS.find(p => p.id === id);
+}
 
 type SoundSettingsType = {
   ambientSoundId: string;
@@ -38,6 +46,16 @@ export const sounds = {
     } catch {
       current = { ...DEFAULT_SETTINGS };
     }
+    // A failed lofi stream (offline / station down) gets surfaced; local
+    // ambient files essentially never error so we only warn for stations.
+    audioEngine.onAmbientError(() => {
+      const station = LOFI_STATIONS.find(s => s.id === current.ambientSoundId);
+      if (station) {
+        toast.error('Radio unavailable', {
+          description: `Couldn't reach ${station.name}. Check your connection.`
+        });
+      }
+    });
   },
 
   setAmbientSound(soundId: string): void {
@@ -70,12 +88,12 @@ export const sounds = {
   // the currently-selected preset and hands the audio engine what to play, so
   // callers just pass whether ambient should be audible right now.
   syncAmbient(active: boolean): void {
-    const preset = SOUND_PRESETS.find((p) => p.id === current.ambientSoundId);
-    if (!active || !preset || !preset.src) {
+    const source = findSource(current.ambientSoundId);
+    if (!active || !source || !source.src) {
       audioEngine.stopAmbient();
       return;
     }
-    audioEngine.playAmbient(preset.src, current.ambientVolume / 100);
+    audioEngine.playAmbient(source.src, current.ambientVolume / 100);
   },
 
   stopAmbient(): void {

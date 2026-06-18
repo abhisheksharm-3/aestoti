@@ -19,13 +19,15 @@
     </span>
   </div>
 
-  <div class="flex items-end gap-px h-20">
+  <div class="flex h-20 items-end gap-px">
     {#each hourlyData as data (data.hour)}
       {@const height = (data.totalMinutes / maxMinutes) * 100}
-      <div class="flex-1">
+      <div class="flex h-full flex-1 items-end">
         <div
-          class="w-full transition-opacity {data.hour === bestHour ? 'bg-primary' : 'bg-muted'}"
-          style="height: {Math.max(2, height)}%"
+          class="w-full rounded-sm transition-[height] {data.hour === bestHour && data.totalMinutes > 0
+            ? 'bg-primary'
+            : 'bg-muted'}"
+          style="height: {data.totalMinutes > 0 ? Math.max(6, height) : 2}%"
           title="{formatHour(data.hour)}: {data.sessionCount} sessions, {data.totalMinutes} min"
         ></div>
       </div>

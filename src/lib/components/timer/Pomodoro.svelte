@@ -15,6 +15,7 @@
   import FullscreenMode from './FullscreenMode.svelte';
   import SessionJournal from './SessionJournal.svelte';
   import BreakPrompt from './BreakPrompt.svelte';
+  import SoundQuickPicker from './SoundQuickPicker.svelte';
 
   let isJournalVisible = $state(false);
   let isBreakPromptVisible = $state(false);
@@ -217,6 +218,7 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <SoundQuickPicker />
         <button
           onclick={() => (ui.fullscreen = true)}
           class="grid size-11 place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"

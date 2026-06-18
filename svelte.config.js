@@ -15,7 +15,7 @@ const config = {
         'style-src': ['self', 'unsafe-inline'],
         'img-src': ['self', 'data:'],
         'font-src': ['self'],
-        'media-src': ['self'],
+        'media-src': ['self', 'https://*.somafm.com'],
         'connect-src': ['self'],
         'manifest-src': ['self'],
         'worker-src': ['self'],

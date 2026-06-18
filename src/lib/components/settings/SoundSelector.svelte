@@ -3,6 +3,7 @@
   import { Play, Pause } from '@lucide/svelte';
   import { sounds } from '$lib/stores/sounds.svelte';
   import { SOUND_PRESETS } from '$lib/config/sounds';
+  import { LOFI_STATIONS } from '$lib/config/lofi';
 
   let selected = $derived(sounds.current.ambientSoundId);
   let hasSound = $derived(selected !== 'none');
@@ -39,6 +40,32 @@
         </button>
       {/each}
     </div>
+  </section>
+
+  <section class="space-y-3">
+    <div class="flex items-center gap-2">
+      <div class="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Radio</div>
+      <span class="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+        <span class="size-1.5 rounded-full bg-primary"></span>live
+      </span>
+    </div>
+    <div class="grid grid-cols-3 gap-2">
+      {#each LOFI_STATIONS as station (station.id)}
+        <button
+          onclick={() => pick(station.id)}
+          class="flex flex-col items-start gap-2 rounded-md border p-3 text-left transition-colors {selected ===
+          station.id
+            ? 'border-primary bg-primary/5'
+            : 'border-border hover:border-foreground/30'}"
+        >
+          <span class="text-lg leading-none">{station.icon}</span>
+          <span class="text-[13px] font-medium {selected === station.id ? 'text-primary' : 'text-foreground'}">
+            {station.name}
+          </span>
+        </button>
+      {/each}
+    </div>
+    <p class="font-mono text-[10px] text-muted-foreground">Streamed live via SomaFM · needs a connection</p>
   </section>
 
   {#if hasSound}

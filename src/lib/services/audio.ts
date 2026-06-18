@@ -4,14 +4,21 @@ import { browser } from '$app/environment';
 // The sounds store holds *which* sound + volume; this service is the only thing
 // that touches the DOM audio API, so playback mechanics stay out of the store.
 let ambientEl: HTMLAudioElement | null = null;
+let ambientErrorHandler: (() => void) | null = null;
 
 export const audioEngine = {
+  /** Register a callback fired when ambient playback errors (e.g. a dead stream). */
+  onAmbientError(cb: () => void): void {
+    ambientErrorHandler = cb;
+  },
+
   /** Play (or reconcile) the looping ambient track at `volume` (0–1). */
   playAmbient(src: string, volume: number): void {
     if (!browser) return;
     if (!ambientEl) {
       ambientEl = new Audio();
       ambientEl.loop = true;
+      ambientEl.addEventListener('error', () => ambientErrorHandler?.());
     }
     ambientEl.volume = volume;
     const fullSrc = new URL(src, window.location.href).href;
