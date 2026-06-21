@@ -24,12 +24,6 @@
 
   let currentTitle = $derived(MODE_CONFIG[timer.state.currentMode].title);
   let activeTask = $derived(tasks.tasks.find((t) => t.id === tasks.activeTaskId));
-  let blockMinutes = $derived(Math.round(timer.totalSeconds / 60));
-  let elapsedPct = $derived(
-    timer.totalSeconds > 0
-      ? Math.min(100, ((timer.totalSeconds - timer.state.remainingSeconds) / timer.totalSeconds) * 100)
-      : 0
-  );
   let goalTarget = $derived(goals.current.targetSessions);
   let sessionsToday = $derived(analytics.summary.sessionsToday);
   let streak = $derived(analytics.summary.currentStreak);
@@ -169,7 +163,7 @@
         </span>
         <span class="hidden h-px w-12 bg-border sm:block"></span>
       {/if}
-      <span class="hidden tabular-nums sm:inline">{blockMinutes} min block</span>
+      <span class="hidden tabular-nums sm:inline">{timer.totalMinutes} min block</span>
     </div>
 
     {#if isBreakPromptVisible}
@@ -195,11 +189,11 @@
       aria-label="{currentTitle} progress"
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-valuenow={Math.round(elapsedPct)}
+      aria-valuenow={Math.round(timer.progressPercent)}
     >
       <div
         class="h-full bg-primary transition-[width] duration-1000 ease-linear"
-        style="width: {elapsedPct}%"
+        style="width: {timer.progressPercent}%"
       ></div>
     </div>
 

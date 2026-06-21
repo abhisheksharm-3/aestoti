@@ -73,8 +73,10 @@ export const sounds = {
     });
   },
 
-  setAmbientSound(soundId: string): void {
+  /** Select an ambient sound; choosing "none" also ends any active preview. */
+  selectAmbient(soundId: string): void {
     current = { ...current, ambientSoundId: soundId };
+    if (soundId === 'none') previewing = false;
     persist();
   },
 

@@ -8,16 +8,10 @@
   let selected = $derived(sounds.current.ambientSoundId);
   let hasSound = $derived(selected !== 'none');
 
-  function pick(soundId: string): void {
-    sounds.setAmbientSound(soundId);
-    if (soundId === 'none') sounds.setPreview(false);
-  }
-
   function togglePreview(): void {
     sounds.setPreview(!sounds.previewing);
   }
 
-  // Stop the preview when the panel closes.
   onDestroy(() => sounds.setPreview(false));
 </script>
 
@@ -27,7 +21,7 @@
     <div class="grid grid-cols-3 gap-2">
       {#each SOUND_PRESETS as preset (preset.id)}
         <button
-          onclick={() => pick(preset.id)}
+          onclick={() => sounds.selectAmbient(preset.id)}
           class="flex flex-col items-start gap-2 rounded-md border p-3 text-left transition-colors {selected ===
           preset.id
             ? 'border-primary bg-primary/5'
@@ -52,7 +46,7 @@
     <div class="grid grid-cols-3 gap-2">
       {#each LOFI_STATIONS as station (station.id)}
         <button
-          onclick={() => pick(station.id)}
+          onclick={() => sounds.selectAmbient(station.id)}
           class="flex flex-col items-start gap-2 rounded-md border p-3 text-left transition-colors {selected ===
           station.id
             ? 'border-primary bg-primary/5'

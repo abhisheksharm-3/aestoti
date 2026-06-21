@@ -28,12 +28,6 @@
   });
 
   let currentTitle = $derived(MODE_CONFIG[timer.state.currentMode].title);
-  let blockMinutes = $derived(Math.round(timer.totalSeconds / 60));
-  let elapsedPct = $derived(
-    timer.totalSeconds > 0
-      ? Math.min(100, ((timer.totalSeconds - timer.state.remainingSeconds) / timer.totalSeconds) * 100)
-      : 0
-  );
 
   async function handleEnterFullscreen(): Promise<void> {
     if (containerEl && document.fullscreenElement !== containerEl) {
@@ -80,7 +74,7 @@
   <div class="flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:gap-5 sm:text-xs">
     <span class="text-foreground">{clockMode ? 'Clock' : currentTitle}</span>
     <span class="h-px flex-1 bg-border"></span>
-    <span class="tabular-nums">{blockMinutes} min block</span>
+    <span class="tabular-nums">{timer.totalMinutes} min block</span>
     <button
       onclick={handleExitFullscreen}
       class="ml-2 grid size-9 place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
@@ -117,9 +111,9 @@
     aria-label="{currentTitle} progress"
     aria-valuemin={0}
     aria-valuemax={100}
-    aria-valuenow={Math.round(elapsedPct)}
+    aria-valuenow={Math.round(timer.progressPercent)}
   >
-    <div class="h-full bg-primary transition-[width] duration-1000 ease-linear" style="width: {elapsedPct}%"></div>
+    <div class="h-full bg-primary transition-[width] duration-1000 ease-linear" style="width: {timer.progressPercent}%"></div>
   </div>
 
   <!-- transport + hint -->

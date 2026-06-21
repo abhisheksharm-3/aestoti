@@ -2,33 +2,9 @@ import { browser } from '$app/environment';
 import { settings } from './settings.svelte';
 import { writeStorage } from '$lib/utils/storage';
 import type { PomodoroModeType, TimerStateType, SessionCompleteCallbackType } from '$lib/types';
+import { computeTimerRecovery, type TimerSnapshotType } from '$lib/utils/timer-recovery';
 
 const STORAGE_KEY = 'aestoti_timer';
-
-/** Serializable timer state, persisted so a reload can resume a live session. */
-export type TimerSnapshotType = {
-  currentMode: PomodoroModeType;
-  focusSessionCount: number;
-  isRunning: boolean;
-  deadline: number | null;
-  modeStartTime: string | null;
-};
-
-/**
- * Decide what to do with a persisted snapshot on load. Pure so it can be tested
- * without a browser: resume only a session that was running and whose absolute
- * deadline is still in the future; otherwise the caller resets the mode.
- */
-export function computeTimerRecovery(
-  snap: TimerSnapshotType,
-  nowMs: number
-): { resume: boolean; remainingSeconds: number } | null {
-  if (!snap.isRunning || snap.deadline == null) return null;
-  const remaining = Math.round((snap.deadline - nowMs) / 1000);
-  return remaining > 0
-    ? { resume: true, remainingSeconds: remaining }
-    : { resume: false, remainingSeconds: 0 };
-}
 
 let state = $state<TimerStateType>({
   currentMode: 'focus',
@@ -118,6 +94,17 @@ export const timer = {
 
   get totalSeconds(): number {
     return getModeDuration(state.currentMode);
+  },
+
+  /** Whole-minute length of the current mode's block, for display. */
+  get totalMinutes(): number {
+    return Math.round(getModeDuration(state.currentMode) / 60);
+  },
+
+  /** Elapsed progress through the current block, clamped to 0–100. */
+  get progressPercent(): number {
+    const total = getModeDuration(state.currentMode);
+    return total > 0 ? Math.min(100, ((total - state.remainingSeconds) / total) * 100) : 0;
   },
 
   get lastTransitionCompleted(): boolean {

@@ -16,11 +16,6 @@
   // (idle, paused, breaks) the user drives playback with the Play/Stop toggle.
   let focusPlaying = $derived(timer.state.isRunning && timer.state.currentMode === 'focus');
 
-  function pick(id: string): void {
-    sounds.setAmbientSound(id);
-    if (id === 'none') sounds.setPreview(false);
-  }
-
   function togglePlay(): void {
     // Pressing play implies sound is on, even if globally muted.
     if (!sounds.previewing && !settings.current.hasSound) settings.updateSetting('hasSound', true);
@@ -90,7 +85,7 @@
         <div class="grid grid-cols-3 gap-1.5">
           {#each SOUND_PRESETS as preset (preset.id)}
             <button
-              onclick={() => pick(preset.id)}
+              onclick={() => sounds.selectAmbient(preset.id)}
               class="flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-left text-[12px] transition-colors {selected ===
               preset.id
                 ? 'border-primary bg-primary/5 text-primary'
@@ -113,7 +108,7 @@
         <div class="grid grid-cols-3 gap-1.5">
           {#each LOFI_STATIONS as station (station.id)}
             <button
-              onclick={() => pick(station.id)}
+              onclick={() => sounds.selectAmbient(station.id)}
               class="flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-left text-[12px] transition-colors {selected ===
               station.id
                 ? 'border-primary bg-primary/5 text-primary'
