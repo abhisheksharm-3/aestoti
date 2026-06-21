@@ -7,7 +7,7 @@
   import { SOUND_PRESETS } from '$lib/config/sounds';
   import { LOFI_STATIONS } from '$lib/config/lofi';
 
-  let open = $state(false);
+  let isOpen = $state(false);
   let wrapperEl = $state<HTMLDivElement>();
 
   let selected = $derived(sounds.current.ambientSoundId);
@@ -18,22 +18,22 @@
 
   function togglePlay(): void {
     // Pressing play implies sound is on, even if globally muted.
-    if (!sounds.previewing && !settings.current.hasSound) settings.updateSetting('hasSound', true);
-    sounds.setPreview(!sounds.previewing);
+    if (!sounds.isPreviewing && !settings.current.hasSound) settings.updateSetting('hasSound', true);
+    sounds.setPreview(!sounds.isPreviewing);
   }
 
   function handleWindowPointer(event: MouseEvent): void {
-    if (open && wrapperEl && !wrapperEl.contains(event.target as Node)) open = false;
+    if (isOpen && wrapperEl && !wrapperEl.contains(event.target as Node)) isOpen = false;
   }
   function handleWindowKey(event: KeyboardEvent): void {
-    if (open && event.key === 'Escape') open = false;
+    if (isOpen && event.key === 'Escape') isOpen = false;
   }
 
-  // An idle preview is only audible while the popover is open. Closing it (or
+  // An idle preview is only audible while the popover is isOpen. Closing it (or
   // unmounting) ends the preview; a running focus block keeps its own ambient
-  // going via the Pomodoro effect, independent of `previewing`.
+  // going via the Pomodoro effect, independent of `isPreviewing`.
   $effect(() => {
-    if (!open) sounds.setPreview(false);
+    if (!isOpen) sounds.setPreview(false);
   });
   onDestroy(() => sounds.setPreview(false));
 </script>
@@ -42,9 +42,9 @@
 
 <div class="relative" bind:this={wrapperEl}>
   <button
-    onclick={() => (open = !open)}
+    onclick={() => (isOpen = !isOpen)}
     aria-haspopup="dialog"
-    aria-expanded={open}
+    aria-expanded={isOpen}
     aria-label="Choose ambient sound"
     title="Sound"
     class="grid size-11 place-items-center rounded-md border border-border transition-colors hover:text-foreground {hasSelection
@@ -54,7 +54,7 @@
     <Headphones class="size-4" />
   </button>
 
-  {#if open}
+  {#if isOpen}
     <div
       role="dialog"
       aria-label="Sound"
@@ -71,7 +71,7 @@
             onclick={togglePlay}
             class="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-[12px] font-medium text-foreground transition-colors hover:border-foreground/30"
           >
-            {#if sounds.previewing}
+            {#if sounds.isPreviewing}
               <Pause class="size-3" /> Stop
             {:else}
               <Play class="size-3" /> Play

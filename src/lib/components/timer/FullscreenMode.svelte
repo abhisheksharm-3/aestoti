@@ -11,8 +11,8 @@
 
   // Wall-clock mode: swap the countdown for the current time of day. The timer
   // keeps running underneath; this only changes what the big display shows.
-  let clockMode = $state(false);
-  let showSeconds = $state(false);
+  let isClockMode = $state(false);
+  let shouldShowSeconds = $state(false);
   let now = $state(new Date());
   let clock = $derived({
     h: String(now.getHours()).padStart(2, '0'),
@@ -21,7 +21,7 @@
   });
 
   $effect(() => {
-    if (!clockMode) return;
+    if (!isClockMode) return;
     now = new Date();
     const id = setInterval(() => (now = new Date()), 1000);
     return () => clearInterval(id);
@@ -72,7 +72,7 @@
 >
   <!-- eyebrow -->
   <div class="flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:gap-5 sm:text-xs">
-    <span class="text-foreground">{clockMode ? 'Clock' : currentTitle}</span>
+    <span class="text-foreground">{isClockMode ? 'Clock' : currentTitle}</span>
     <span class="h-px flex-1 bg-border"></span>
     <span class="tabular-nums">{timer.totalMinutes} min block</span>
     <button
@@ -89,11 +89,11 @@
   <div class="flex flex-1 items-center justify-center">
     <div
       class="font-semibold leading-[0.78] tracking-[-0.045em] tabular-nums select-none"
-      style="font-size: {clockMode && showSeconds ? 'clamp(3.5rem, 18vw, 17rem)' : 'clamp(5rem, 26vw, 24rem)'}"
+      style="font-size: {isClockMode && shouldShowSeconds ? 'clamp(3.5rem, 18vw, 17rem)' : 'clamp(5rem, 26vw, 24rem)'}"
     >
-      {#if clockMode}
+      {#if isClockMode}
         <span>{clock.h}</span><span class="text-muted-foreground/30">:</span><span class="text-primary">{clock.m}</span
-        >{#if showSeconds}<span class="text-muted-foreground/30">:</span><span class="text-muted-foreground/70"
+        >{#if shouldShowSeconds}<span class="text-muted-foreground/30">:</span><span class="text-muted-foreground/70"
             >{clock.s}</span
           >{/if}
       {:else}
@@ -124,23 +124,23 @@
         <span class="mx-2 text-muted-foreground/50">·</span>
         <kbd class="rounded bg-secondary px-1.5 py-0.5">Space</kbd> play / pause
       </div>
-      {#if clockMode}
+      {#if isClockMode}
         <button
-          onclick={() => (showSeconds = !showSeconds)}
-          aria-pressed={showSeconds}
+          onclick={() => (shouldShowSeconds = !shouldShowSeconds)}
+          aria-pressed={shouldShowSeconds}
           class="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
         >
-          Seconds <span class={showSeconds ? 'text-primary' : 'text-muted-foreground/50'}>{showSeconds ? 'on' : 'off'}</span>
+          Seconds <span class={shouldShowSeconds ? 'text-primary' : 'text-muted-foreground/50'}>{shouldShowSeconds ? 'on' : 'off'}</span>
         </button>
       {/if}
     </div>
     <div class="flex items-center justify-end gap-3">
       <button
-        onclick={() => (clockMode = !clockMode)}
-        aria-pressed={clockMode}
-        aria-label={clockMode ? 'Show timer' : 'Show clock'}
+        onclick={() => (isClockMode = !isClockMode)}
+        aria-pressed={isClockMode}
+        aria-label={isClockMode ? 'Show timer' : 'Show clock'}
         title="Clock"
-        class="grid size-12 place-items-center rounded-md border border-border transition-colors hover:text-foreground {clockMode
+        class="grid size-12 place-items-center rounded-md border border-border transition-colors hover:text-foreground {isClockMode
           ? 'text-primary'
           : 'text-muted-foreground'}"
       >

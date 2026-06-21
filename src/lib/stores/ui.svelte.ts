@@ -1,31 +1,31 @@
 import type { PanelType } from '$lib/types';
 
-let commandOpen = $state(false);
+let isCommandOpen = $state(false);
 let activePanel = $state<PanelType | null>(null);
-let fullscreen = $state(false);
+let isFullscreen = $state(false);
 
 export const ui = {
-  get commandOpen() {
-    return commandOpen;
+  get isCommandOpen() {
+    return isCommandOpen;
   },
-  set commandOpen(value: boolean) {
-    commandOpen = value;
+  set isCommandOpen(value: boolean) {
+    isCommandOpen = value;
   },
 
   get activePanel() {
     return activePanel;
   },
 
-  get fullscreen() {
-    return fullscreen;
+  get isFullscreen() {
+    return isFullscreen;
   },
-  set fullscreen(value: boolean) {
-    fullscreen = value;
+  set isFullscreen(value: boolean) {
+    isFullscreen = value;
   },
 
   openPanel(panel: PanelType): void {
     activePanel = panel;
-    commandOpen = false;
+    isCommandOpen = false;
   },
 
   closePanel(): void {
@@ -33,6 +33,6 @@ export const ui = {
   },
 
   toggleCommand(): void {
-    commandOpen = !commandOpen;
+    isCommandOpen = !isCommandOpen;
   }
 };

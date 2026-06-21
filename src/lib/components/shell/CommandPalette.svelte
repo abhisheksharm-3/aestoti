@@ -19,11 +19,11 @@
 
   function run(fn: () => void): void {
     fn();
-    ui.commandOpen = false;
+    ui.isCommandOpen = false;
   }
 </script>
 
-<Command.Dialog bind:open={ui.commandOpen}>
+<Command.Dialog bind:open={ui.isCommandOpen}>
   <Command.Input placeholder="Type a command or search…" />
   <Command.List>
     <Command.Empty>No results found.</Command.Empty>
@@ -42,7 +42,7 @@
       <Command.Item onSelect={() => run(() => timer.restart())}>
         <RotateCcw class="mr-2 size-4" /> Restart this mode
       </Command.Item>
-      <Command.Item onSelect={() => run(() => (ui.fullscreen = true))}>
+      <Command.Item onSelect={() => run(() => (ui.isFullscreen = true))}>
         <Maximize2 class="mr-2 size-4" /> Enter fullscreen
       </Command.Item>
     </Command.Group>

@@ -9,7 +9,7 @@
   let hasSound = $derived(selected !== 'none');
 
   function togglePreview(): void {
-    sounds.setPreview(!sounds.previewing);
+    sounds.setPreview(!sounds.isPreviewing);
   }
 
   onDestroy(() => sounds.setPreview(false));
@@ -70,7 +70,7 @@
           onclick={togglePreview}
           class="inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-foreground/30"
         >
-          {#if sounds.previewing}
+          {#if sounds.isPreviewing}
             <Pause class="size-3.5" /> Stop
           {:else}
             <Play class="size-3.5" /> Play

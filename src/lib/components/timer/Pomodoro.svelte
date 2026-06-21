@@ -47,11 +47,11 @@
   });
 
   // Ambient sound — single source of truth. Plays during a running focus session
-  // (or while previewing in the Sound panel), gated by the global sound toggle.
+  // (or while isPreviewing in the Sound panel), gated by the global sound toggle.
   // Reading the selected sound + volume here makes changing them reconcile live.
   $effect(() => {
     const playingForFocus = timer.state.isRunning && timer.state.currentMode === 'focus';
-    const active = (playingForFocus || sounds.previewing) && settings.current.hasSound;
+    const active = (playingForFocus || sounds.isPreviewing) && settings.current.hasSound;
     void sounds.current.ambientSoundId;
     void sounds.current.ambientVolume;
     sounds.syncAmbient(active);
@@ -98,7 +98,7 @@
     // Never hijack keys while typing in a field or with a panel / command menu /
     // journal open — bare Space (toggleTimer) would otherwise swallow the space
     // and toggle the timer mid-edit.
-    if (isEditableTarget(event.target) || ui.activePanel || ui.commandOpen || isJournalVisible) return;
+    if (isEditableTarget(event.target) || ui.activePanel || ui.isCommandOpen || isJournalVisible) return;
     if (shortcuts.matchesEvent(event, 'openSettings')) {
       event.preventDefault();
       ui.openPanel('settings');
@@ -113,7 +113,7 @@
       timer.restart();
     } else if (shortcuts.matchesEvent(event, 'toggleFullscreen')) {
       event.preventDefault();
-      ui.fullscreen = !ui.fullscreen;
+      ui.isFullscreen = !ui.isFullscreen;
     }
   }
 
@@ -149,8 +149,8 @@
   <link rel="icon" href="/logo-short.png" />
 </svelte:head>
 
-{#if ui.fullscreen}
-  <FullscreenMode onExit={() => (ui.fullscreen = false)} />
+{#if ui.isFullscreen}
+  <FullscreenMode onExit={() => (ui.isFullscreen = false)} />
 {:else}
   <div class="mx-auto flex h-full w-full max-w-5xl flex-col justify-center px-6 sm:px-10">
     <!-- eyebrow -->
@@ -221,7 +221,7 @@
       <div class="flex items-center gap-2">
         <SoundQuickPicker />
         <button
-          onclick={() => (ui.fullscreen = true)}
+          onclick={() => (ui.isFullscreen = true)}
           class="grid size-11 place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"
           aria-label="Enter fullscreen"
           title="Fullscreen (Alt+F)"

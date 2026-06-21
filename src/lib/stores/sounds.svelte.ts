@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS: SoundSettingsType = {
 };
 
 let current = $state<SoundSettingsType>({ ...DEFAULT_SETTINGS });
-let previewing = $state(false);
+let isPreviewing = $state(false);
 
 function persist(): void {
   writeStorage(STORAGE_KEY, JSON.stringify(current));
@@ -51,7 +51,7 @@ function sanitizeSounds(raw: Partial<SoundSettingsType>): SoundSettingsType {
 
 export const sounds = {
   get current() { return current; },
-  get previewing() { return previewing; },
+  get isPreviewing() { return isPreviewing; },
 
   initialize(): void {
     if (!browser) return;
@@ -76,7 +76,7 @@ export const sounds = {
   /** Select an ambient sound; choosing "none" also ends any active preview. */
   selectAmbient(soundId: string): void {
     current = { ...current, ambientSoundId: soundId };
-    if (soundId === 'none') previewing = false;
+    if (soundId === 'none') isPreviewing = false;
     persist();
   },
 
@@ -87,7 +87,7 @@ export const sounds = {
   },
 
   setPreview(value: boolean): void {
-    previewing = value;
+    isPreviewing = value;
   },
 
   setNotificationSound(soundId: string): void {
@@ -101,7 +101,7 @@ export const sounds = {
   },
 
   // Single source of truth for ambient playback. `active` is the caller's full
-  // intent (focus session running, or previewing, AND sound enabled). Resolves
+  // intent (focus session running, or isPreviewing, AND sound enabled). Resolves
   // the currently-selected preset and hands the audio engine what to play, so
   // callers just pass whether ambient should be audible right now.
   syncAmbient(active: boolean): void {
