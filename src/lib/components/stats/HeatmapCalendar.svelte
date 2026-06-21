@@ -3,7 +3,7 @@
   import { dayKey } from '$lib/utils/date';
 
   const WEEKS = 18;
-  // Monday-first rows; label every other row like GitHub.
+  /** Monday-first weekday rows, labelling every other row like GitHub's heatmap. */
   const DAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', ''];
 
   type Cell = { date: string; count: number; isToday: boolean; isFuture: boolean };
@@ -24,8 +24,7 @@
     return map;
   }
 
-  // Week-aligned grid (each column is a Mon–Sun calendar week) so weekday rows
-  // and month labels are accurate; days after today render as blanks.
+  /** Build a week-aligned grid (each column a Mon–Sun week) so weekday rows and month labels line up; days after today are left blank. */
   function buildColumns(map: Map<string, number>): Cell[][] {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -53,7 +52,7 @@
     return cols;
   }
 
-  // Label a column with its month abbreviation when the month changes.
+  /** Label a column with its month abbreviation at each month boundary. */
   function buildMonthLabels(cols: Cell[][]): string[] {
     const labels: string[] = new Array(cols.length).fill('');
     let prevMonth = -1;
@@ -68,7 +67,7 @@
     return labels;
   }
 
-  // Empty days recede to faint scaffolding; activity climbs the accent.
+  /** Map a day's session count to a heat shade — empty days stay faint, busier days climb the accent. */
   function getColor(count: number): string {
     if (count === 0) return 'bg-foreground/[0.06]';
     if (count === 1) return 'bg-primary/30';
@@ -94,7 +93,6 @@
 
   <div class="overflow-x-auto pb-2">
     <div class="inline-flex flex-col gap-1.5">
-      <!-- month labels, aligned over the week columns -->
       <div class="flex gap-2">
         <div class="w-8 shrink-0"></div>
         <div class="flex gap-1">
@@ -106,7 +104,6 @@
         </div>
       </div>
 
-      <!-- weekday gutter + grid -->
       <div class="flex gap-2">
         <div class="flex w-8 shrink-0 flex-col gap-1">
           {#each DAY_LABELS as label, i (i)}

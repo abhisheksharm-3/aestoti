@@ -1,7 +1,6 @@
 import type { PomodoroSessionType } from '$lib/types';
 
-// A leading =, +, -, @ (or tab/CR) makes a spreadsheet treat the cell as a
-// formula. Prefix with an apostrophe so Excel/Sheets render it as literal text.
+/** A leading `=`, `+`, `-`, `@`, tab, or CR makes a spreadsheet treat a cell as a formula; such fields are prefixed with an apostrophe to render as literal text. */
 const FORMULA_TRIGGER = /^[=+\-@\t\r]/;
 
 /** RFC-4180-style escaping plus CSV formula-injection neutralization. */

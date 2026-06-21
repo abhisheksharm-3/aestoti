@@ -49,6 +49,7 @@
   }
 
   let fileInput = $state<HTMLInputElement>();
+  /** Read a sessions JSON file, merge it, and toast the result; the input is cleared afterward so the same file can be re-selected. */
   async function importJSON(event: Event): Promise<void> {
     const input = event.currentTarget as HTMLInputElement;
     const file = input.files?.[0];
@@ -65,7 +66,7 @@
         description: e instanceof Error ? e.message : 'Could not read that file.'
       });
     } finally {
-      input.value = ''; // let the same file be re-selected later
+      input.value = '';
     }
   }
 </script>
@@ -83,7 +84,6 @@
     use:trapFocus
   >
     <div class="flex h-svh flex-col" in:fly={{ y: 14, duration: 260 }}>
-      <!-- header: wordmark · live timer · close -->
       <header class="flex items-center justify-between border-b border-border px-5 py-4 sm:px-8">
         <span class="font-display text-2xl italic leading-none">aestoti<span class="text-primary">.</span></span>
         <div class="flex items-center gap-2">
@@ -112,7 +112,6 @@
       </header>
 
       <div class="flex min-h-0 flex-1">
-        <!-- desktop nav -->
         <nav class="hidden w-56 shrink-0 flex-col gap-1 border-r border-border p-4 lg:flex">
           {#each NAV as item (item.id)}
             {@const Icon = item.icon}
@@ -129,7 +128,6 @@
         </nav>
 
         <div class="flex min-h-0 min-w-0 flex-1 flex-col">
-          <!-- mobile/tablet nav: even bottom-nav style, all five fit -->
           <div class="flex border-b border-border lg:hidden">
             {#each NAV as item (item.id)}
               {@const Icon = item.icon}

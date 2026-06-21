@@ -18,8 +18,7 @@ let modeStartTime: Date | undefined;
 let deadline: number | undefined;
 let onSessionComplete: SessionCompleteCallbackType | undefined;
 let visibilityHandler: (() => void) | null = null;
-// True when the most recent mode change came from a natural timer completion,
-// false when it came from a manual skip — so the UI only chimes on completion.
+/** True when the last mode change came from a natural completion, false on a manual skip — so the UI only chimes on completion. */
 let lastTransitionCompleted = false;
 
 function getModeDuration(mode: PomodoroModeType): number {
@@ -52,6 +51,14 @@ function persistRunState(): void {
   writeStorage(STORAGE_KEY, JSON.stringify(snap));
 }
 
+/**
+ * Rehydrate timer state from storage. Restores the mode and long-break cadence,
+ * and resumes a running session only when its remaining time is plausible — a
+ * span longer than the mode's own length signals a stale snapshot (e.g. a
+ * backward clock change) and is reset rather than resumed, so a phantom
+ * multi-hour session is never recorded. A resumed session keeps its original
+ * start time so its recorded span stays true.
+ */
 function restoreRunState(): void {
   let snap: TimerSnapshotType | null = null;
   try {
@@ -64,17 +71,12 @@ function restoreRunState(): void {
     state.remainingSeconds = getModeDuration('focus');
     return;
   }
-  // Restore mode + cadence so the long-break rhythm survives a reload.
   state.currentMode = snap.currentMode;
   state.focusSessionCount = snap.focusSessionCount;
   const recovery = computeTimerRecovery(snap, Date.now());
   const fullDuration = getModeDuration(state.currentMode);
-  // Resume only a plausible deadline. A remaining span longer than the mode's
-  // own length means a stale/tampered snapshot (e.g. the clock moved backward);
-  // resuming it would later record a wildly inflated session, so reset instead.
   if (recovery?.resume && recovery.remainingSeconds <= fullDuration) {
     state.remainingSeconds = recovery.remainingSeconds;
-    // Keep the original start time so the resumed session records its true span.
     modeStartTime = snap.modeStartTime ? new Date(snap.modeStartTime) : new Date();
     timer.start();
   } else {
@@ -115,10 +117,14 @@ export const timer = {
     onSessionComplete = callback;
   },
 
+  /**
+   * Hydrate from storage and attach a visibility listener that resyncs the
+   * countdown when the tab regains focus. The listener is added once (guarded
+   * against client-nav / HMR re-init) and removed in destroy().
+   */
   initialize(): void {
     if (browser) restoreRunState();
     else state.remainingSeconds = getModeDuration('focus');
-    // Guard against re-adding on re-init (client nav / HMR) — see destroy().
     if (browser && !visibilityHandler) {
       visibilityHandler = () => {
         if (!document.hidden) timer.resync();
@@ -127,16 +133,20 @@ export const timer = {
     }
   },
 
+  /**
+   * Start (or resume) the countdown from an absolute wall-clock deadline, so the
+   * display stays accurate across tab suspension instead of drifting off a local
+   * counter. The tick bails when the deadline has been cleared (e.g. already
+   * completed by resync), preventing a queued interval from firing
+   * handleModeComplete a second time.
+   */
   start(): void {
     if (!browser) return;
     if (!modeStartTime) modeStartTime = new Date();
     deadline = Date.now() + state.remainingSeconds * 1000;
     state.isRunning = true;
     persistRunState();
-    // Repaint from the wall clock — do NOT count down a local variable.
     intervalId = window.setInterval(() => {
-      // Bail if the mode was already completed (e.g. by resync) and the deadline
-      // cleared — prevents a queued tick from double-firing handleModeComplete.
       if (deadline === undefined) return;
       const remaining = Math.round((deadline - Date.now()) / 1000);
       if (remaining <= 0) {
@@ -190,14 +200,16 @@ export const timer = {
     else persistRunState();
   },
 
+  /**
+   * Abandon the current mode without completing it. A skipped focus earns no
+   * progress toward the long break — the cadence counter is left untouched, so a
+   * skip always lands on a short break; only a finished focus advances it.
+   */
   skip(): void {
     stopInterval();
     state.isRunning = false;
     lastTransitionCompleted = false;
     if (modeStartTime) onSessionComplete?.(state.currentMode, modeStartTime, new Date(), false);
-    // A skipped (abandoned) focus does NOT earn progress toward the long break,
-    // so the cadence counter is left untouched and a skip always lands on a short
-    // break. Only handleModeComplete (a finished focus) advances focusSessionCount.
     const nextMode: PomodoroModeType = state.currentMode === 'focus' ? 'shortBreak' : 'focus';
     state.currentMode = nextMode;
     state.remainingSeconds = getModeDuration(nextMode);

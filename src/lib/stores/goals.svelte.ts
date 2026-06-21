@@ -32,8 +32,9 @@ export const goals = {
     }
   },
 
+  /** Set the daily session goal, clamped to 1–24; ignores non-finite input. */
   setTarget(target: number): void {
-    if (!Number.isFinite(target)) return; // ignore NaN/Infinity, keep prior value
+    if (!Number.isFinite(target)) return;
     current = { ...current, targetSessions: Math.min(24, Math.max(1, target)) };
     persist();
   },
@@ -44,7 +45,7 @@ export const goals = {
   }
 };
 
-/** Pure function — call inside $derived in components */
+/** Compute today's goal progress — completed focus sessions against the target — from a session list. */
 export function computeDailyProgress(
   sessions: PomodoroSessionType[],
   goal: DailyGoalType

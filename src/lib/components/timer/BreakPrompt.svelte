@@ -25,14 +25,18 @@
     'Rest your eyes — no screens'
   ];
 
+  /** Pick a random rest suggestion for the given break mode. */
   function pickPrompt(m: PomodoroModeType): string {
     const list = m === 'longBreak' ? LONG_BREAK_PROMPTS : SHORT_BREAK_PROMPTS;
     return list[Math.floor(Math.random() * list.length)];
   }
 
-  // Pick once per mode change. A $derived here would be impure (Math.random in a
-  // derived re-rolls on unrelated invalidations); an effect keyed on `mode` is stable.
-  // untrack: the initializer intentionally reads `mode` once; the effect owns updates.
+  /**
+   * Pick a fresh prompt once per mode change. A $derived would be impure
+   * (Math.random re-rolls on unrelated invalidations), so an effect keyed on
+   * `mode` is used; the initializer reads `mode` untracked since the effect owns
+   * later updates.
+   */
   let prompt = $state(untrack(() => pickPrompt(mode)));
   $effect(() => {
     prompt = pickPrompt(mode);

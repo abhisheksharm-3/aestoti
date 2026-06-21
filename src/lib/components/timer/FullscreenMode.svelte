@@ -9,8 +9,7 @@
 
   let containerEl = $state<HTMLDivElement | undefined>(undefined);
 
-  // Wall-clock mode: swap the countdown for the current time of day. The timer
-  // keeps running underneath; this only changes what the big display shows.
+  /** Wall-clock mode swaps the countdown for the current time of day; the timer keeps running underneath, only the display changes. */
   let isClockMode = $state(false);
   let shouldShowSeconds = $state(false);
   let now = $state(new Date());
@@ -46,9 +45,11 @@
     if (!document.fullscreenElement) onExit();
   }
 
-  // Esc must exit even when requestFullscreen() was rejected (no user gesture,
-  // blocked by the browser): in that case we never entered native fullscreen, so
-  // `fullscreenchange` never fires and the overlay would otherwise be sticky.
+  /**
+   * Exit on Esc even when requestFullscreen() was rejected (no user gesture, or
+   * blocked): we never entered native fullscreen, so `fullscreenchange` never
+   * fires and the overlay would otherwise be impossible to dismiss with Esc.
+   */
   function handleKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') handleExitFullscreen();
   }
@@ -65,12 +66,10 @@
   });
 </script>
 
-<!-- Respects the app theme: bg-background / text-foreground + --primary accent. -->
 <div
   bind:this={containerEl}
   class="fixed inset-0 z-50 flex flex-col bg-background px-8 py-7 text-foreground sm:px-14 sm:py-10"
 >
-  <!-- eyebrow -->
   <div class="flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:gap-5 sm:text-xs">
     <span class="text-foreground">{isClockMode ? 'Clock' : currentTitle}</span>
     <span class="h-px flex-1 bg-border"></span>
@@ -85,7 +84,6 @@
     </button>
   </div>
 
-  <!-- giant time, centered in remaining space -->
   <div class="flex flex-1 items-center justify-center">
     <div
       class="font-semibold leading-[0.78] tracking-[-0.045em] tabular-nums select-none"
@@ -104,7 +102,6 @@
     </div>
   </div>
 
-  <!-- progress rule -->
   <div
     class="h-[3px] w-full bg-border"
     role="progressbar"
@@ -116,7 +113,6 @@
     <div class="h-full bg-primary transition-[width] duration-1000 ease-linear" style="width: {timer.progressPercent}%"></div>
   </div>
 
-  <!-- transport + hint -->
   <div class="mt-7 flex items-center justify-between gap-4">
     <div class="flex items-center gap-4">
       <div class="hidden font-mono text-xs tracking-wide text-muted-foreground sm:block">

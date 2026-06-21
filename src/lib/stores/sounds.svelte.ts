@@ -53,6 +53,11 @@ export const sounds = {
   get current() { return current; },
   get isPreviewing() { return isPreviewing; },
 
+  /**
+   * Hydrate sound settings from storage and register the ambient error handler.
+   * Only lofi stations surface an error toast (a failed stream means offline or
+   * a down station); bundled ambient files essentially never error.
+   */
   initialize(): void {
     if (!browser) return;
     try {
@@ -61,8 +66,6 @@ export const sounds = {
     } catch {
       current = { ...DEFAULT_SETTINGS };
     }
-    // A failed lofi stream (offline / station down) gets surfaced; local
-    // ambient files essentially never error so we only warn for stations.
     audioEngine.onAmbientError(() => {
       const station = LOFI_STATIONS.find(s => s.id === current.ambientSoundId);
       if (station) {
@@ -100,10 +103,11 @@ export const sounds = {
     persist();
   },
 
-  // Single source of truth for ambient playback. `active` is the caller's full
-  // intent (focus session running, or isPreviewing, AND sound enabled). Resolves
-  // the currently-selected preset and hands the audio engine what to play, so
-  // callers just pass whether ambient should be audible right now.
+  /**
+   * Single source of truth for ambient playback. `active` is the caller's full
+   * intent (a focus session running or a preview, with sound enabled); this
+   * resolves the selected preset and tells the audio engine what to play.
+   */
   syncAmbient(active: boolean): void {
     const source = findSource(current.ambientSoundId);
     if (!active || !source || !source.src) {

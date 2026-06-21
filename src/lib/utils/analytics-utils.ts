@@ -49,6 +49,7 @@ export function sessionFocusScore(session: PomodoroSessionType): number {
   return completionBonus + durationBonus;
 }
 
+/** Bucket focus sessions into the last `days` calendar days, keyed by local day so the grid aligns with the streak and "today" counters. */
 export function calculateDailyData(
   sessions: PomodoroSessionType[],
   days: number = 365
@@ -60,7 +61,6 @@ export function calculateDailyData(
   for (let i = 0; i < days; i++) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
-    // Local day key so the grid lines up with the streak/"today" counters.
     const dateStr = dayKey(date);
     dailyMap.set(dateStr, { date: dateStr, sessionCount: 0, totalMinutes: 0 });
   }

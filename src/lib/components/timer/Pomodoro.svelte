@@ -37,7 +37,7 @@
     );
   });
 
-  // Wire session-complete callback once at component init
+  /** Record each finished session; a completed focus also advances its active task and opens the journal. */
   timer.setOnSessionComplete((mode, startTime, endTime, isCompleted) => {
     analytics.recordSession(mode, startTime, endTime, isCompleted);
     if (mode === 'focus' && isCompleted) {
@@ -46,9 +46,11 @@
     }
   });
 
-  // Ambient sound — single source of truth. Plays during a running focus session
-  // (or while isPreviewing in the Sound panel), gated by the global sound toggle.
-  // Reading the selected sound + volume here makes changing them reconcile live.
+  /**
+   * Reconcile ambient playback. Audible during a running focus session or while
+   * previewing, gated by the global sound toggle; reading the selected sound and
+   * volume here makes changes to them apply live.
+   */
   $effect(() => {
     const playingForFocus = timer.state.isRunning && timer.state.currentMode === 'focus';
     const active = (playingForFocus || sounds.isPreviewing) && settings.current.hasSound;
@@ -57,12 +59,15 @@
     sounds.syncAmbient(active);
   });
 
-  // Mode change: notifications + break prompt (untracked writes; only currentMode tracked)
+  /**
+   * React to a mode change: fire the completion chime/notification (only on a
+   * natural completion, never a manual skip) and toggle the break prompt. Only
+   * currentMode is tracked; the writes inside run untracked.
+   */
   $effect(() => {
     const currentMode = timer.state.currentMode;
     untrack(() => {
       if (currentMode === previousMode) return;
-      // Only chime/notify on a natural completion — never on a manual skip.
       if (settings.current.hasNotification && timer.lastTransitionCompleted) {
         const completedTitle = MODE_CONFIG[previousMode].title;
         const nextTitle = MODE_CONFIG[currentMode].title;
@@ -94,10 +99,12 @@
     return el.isContentEditable || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT';
   }
 
+  /**
+   * Global timer shortcuts. Skipped while typing in a field or with a panel,
+   * command menu, or journal open, so bare Space (toggleTimer) can't swallow a
+   * space and toggle the timer mid-edit.
+   */
   function handleKeydown(event: KeyboardEvent): void {
-    // Never hijack keys while typing in a field or with a panel / command menu /
-    // journal open — bare Space (toggleTimer) would otherwise swallow the space
-    // and toggle the timer mid-edit.
     if (isEditableTarget(event.target) || ui.activePanel || ui.isCommandOpen || isJournalVisible) return;
     if (shortcuts.matchesEvent(event, 'openSettings')) {
       event.preventDefault();
@@ -117,7 +124,7 @@
     }
   }
 
-  // Ask for notification permission on first start, never on cold load.
+  /** Request notification permission on the first timer start, never on cold load. */
   async function ensureNotificationPermission(): Promise<void> {
     if (
       settings.current.hasNotification &&
@@ -153,7 +160,6 @@
   <FullscreenMode onExit={() => (ui.isFullscreen = false)} />
 {:else}
   <div class="mx-auto flex h-full w-full max-w-5xl flex-col justify-center px-6 sm:px-10">
-    <!-- eyebrow -->
     <div class="flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
       <span class="text-foreground">{currentTitle}</span>
       <span class="h-px flex-1 bg-border"></span>
@@ -172,7 +178,6 @@
       </div>
     {/if}
 
-    <!-- giant time -->
     <div
       class="mt-6 font-semibold leading-[0.78] tracking-[-0.045em] tabular-nums select-none"
       style="font-size: clamp(4.5rem, 21vw, 15rem)"
@@ -182,7 +187,6 @@
       >
     </div>
 
-    <!-- progress rule -->
     <div
       class="mt-8 h-[3px] w-full bg-border"
       role="progressbar"
@@ -197,7 +201,6 @@
       ></div>
     </div>
 
-    <!-- footer: data + transport -->
     <div class="mt-7 flex flex-col gap-6 border-t border-border pt-6 sm:flex-row sm:items-end sm:justify-between">
       <div class="flex flex-wrap gap-x-12 gap-y-4">
         <button onclick={() => ui.openPanel('tasks')} class="group text-left">

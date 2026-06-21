@@ -1,11 +1,13 @@
 import { browser } from '$app/environment';
 
-// Owns the HTMLAudioElement lifecycle for ambient playback and one-shot cues.
-// The sounds store holds *which* sound + volume; this service is the only thing
-// that touches the DOM audio API, so playback mechanics stay out of the store.
 let ambientEl: HTMLAudioElement | null = null;
 let ambientErrorHandler: (() => void) | null = null;
 
+/**
+ * Owns the `HTMLAudioElement` lifecycle for ambient playback and one-shot cues.
+ * The sounds store holds which sound and volume; this service is the only code
+ * that touches the DOM audio API, keeping playback mechanics out of the store.
+ */
 export const audioEngine = {
   /** Register a callback fired when ambient playback errors (e.g. a dead stream). */
   onAmbientError(cb: () => void): void {

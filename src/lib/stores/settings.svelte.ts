@@ -22,9 +22,9 @@ const CLAMP_RULES: Partial<Record<keyof SettingsType, [number, number]>> = {
   longBreakInterval: [1, 10]
 };
 
+/** Clamp a numeric setting into its valid range, falling back to the default for non-finite or non-numeric input from tampered storage. */
 function clampNumber<K extends keyof SettingsType>(key: K, value: unknown): number {
   const fallback = DEFAULT_SETTINGS[key] as number;
-  // Non-numeric or NaN/Infinity from tampered/legacy storage → fall back.
   if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
   const rule = CLAMP_RULES[key];
   return rule ? Math.min(rule[1], Math.max(rule[0], value)) : value;
@@ -54,10 +54,11 @@ export const settings = {
     }
   },
 
+  /** Update one setting, clamping numerics into range and ignoring non-finite values. */
   updateSetting<K extends keyof SettingsType>(key: K, value: SettingsType[K]): void {
     let next = value;
     if (typeof value === 'number') {
-      if (!Number.isFinite(value)) return; // ignore NaN/Infinity, keep prior value
+      if (!Number.isFinite(value)) return;
       next = clampNumber(key, value) as SettingsType[K];
     }
     current = { ...current, [key]: next };

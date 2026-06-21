@@ -12,12 +12,11 @@
 
   let selected = $derived(sounds.current.ambientSoundId);
   let hasSelection = $derived(selected !== 'none');
-  // Ambient already plays on its own during a running focus block; outside that
-  // (idle, paused, breaks) the user drives playback with the Play/Stop toggle.
+  /** During a running focus block ambient plays automatically; elsewhere the user drives it with the Play/Stop toggle. */
   let focusPlaying = $derived(timer.state.isRunning && timer.state.currentMode === 'focus');
 
+  /** Toggle the ambient preview; pressing play also unmutes globally, since the intent is clearly to hear sound. */
   function togglePlay(): void {
-    // Pressing play implies sound is on, even if globally muted.
     if (!sounds.isPreviewing && !settings.current.hasSound) settings.updateSetting('hasSound', true);
     sounds.setPreview(!sounds.isPreviewing);
   }
@@ -29,9 +28,11 @@
     if (isOpen && event.key === 'Escape') isOpen = false;
   }
 
-  // An idle preview is only audible while the popover is isOpen. Closing it (or
-  // unmounting) ends the preview; a running focus block keeps its own ambient
-  // going via the Pomodoro effect, independent of `isPreviewing`.
+  /**
+   * An idle preview is only audible while the popover is open, so closing it (or
+   * unmounting) ends the preview. A running focus block keeps its own ambient
+   * going via the Pomodoro effect, independent of the preview flag.
+   */
   $effect(() => {
     if (!isOpen) sounds.setPreview(false);
   });
