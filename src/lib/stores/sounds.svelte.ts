@@ -34,6 +34,21 @@ function persist(): void {
   writeStorage(STORAGE_KEY, JSON.stringify(current));
 }
 
+function clampVolume(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : fallback;
+}
+
+/** Merge persisted sound settings over defaults, clamping volumes and rejecting non-string ids. */
+function sanitizeSounds(raw: Partial<SoundSettingsType>): SoundSettingsType {
+  return {
+    ambientSoundId: typeof raw.ambientSoundId === 'string' ? raw.ambientSoundId : DEFAULT_SETTINGS.ambientSoundId,
+    ambientVolume: clampVolume(raw.ambientVolume, DEFAULT_SETTINGS.ambientVolume),
+    notificationSoundId:
+      typeof raw.notificationSoundId === 'string' ? raw.notificationSoundId : DEFAULT_SETTINGS.notificationSoundId,
+    notificationVolume: clampVolume(raw.notificationVolume, DEFAULT_SETTINGS.notificationVolume)
+  };
+}
+
 export const sounds = {
   get current() { return current; },
   get previewing() { return previewing; },
@@ -42,7 +57,7 @@ export const sounds = {
     if (!browser) return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) current = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) as SoundSettingsType };
+      if (stored) current = sanitizeSounds(JSON.parse(stored) as Partial<SoundSettingsType>);
     } catch {
       current = { ...DEFAULT_SETTINGS };
     }

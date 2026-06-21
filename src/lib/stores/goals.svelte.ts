@@ -18,7 +18,15 @@ export const goals = {
     if (!browser) return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) current = { ...DEFAULT_GOAL, ...JSON.parse(stored) as DailyGoalType };
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as Partial<DailyGoalType>;
+      const target = Number(parsed.targetSessions);
+      current = {
+        targetSessions: Number.isFinite(target)
+          ? Math.min(24, Math.max(1, target))
+          : DEFAULT_GOAL.targetSessions,
+        isEnabled: typeof parsed.isEnabled === 'boolean' ? parsed.isEnabled : DEFAULT_GOAL.isEnabled
+      };
     } catch {
       current = { ...DEFAULT_GOAL };
     }

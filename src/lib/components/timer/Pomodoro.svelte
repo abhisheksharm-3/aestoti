@@ -94,7 +94,17 @@
     isJournalVisible = false;
   }
 
+  function isEditableTarget(target: EventTarget | null): boolean {
+    const el = target as HTMLElement | null;
+    if (!el) return false;
+    return el.isContentEditable || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT';
+  }
+
   function handleKeydown(event: KeyboardEvent): void {
+    // Never hijack keys while typing in a field or with a panel / command menu /
+    // journal open — bare Space (toggleTimer) would otherwise swallow the space
+    // and toggle the timer mid-edit.
+    if (isEditableTarget(event.target) || ui.activePanel || ui.commandOpen || isJournalVisible) return;
     if (shortcuts.matchesEvent(event, 'openSettings')) {
       event.preventDefault();
       ui.openPanel('settings');

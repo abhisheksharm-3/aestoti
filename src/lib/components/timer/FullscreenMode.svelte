@@ -52,13 +52,22 @@
     if (!document.fullscreenElement) onExit();
   }
 
+  // Esc must exit even when requestFullscreen() was rejected (no user gesture,
+  // blocked by the browser): in that case we never entered native fullscreen, so
+  // `fullscreenchange` never fires and the overlay would otherwise be sticky.
+  function handleKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') handleExitFullscreen();
+  }
+
   onMount(() => {
     handleEnterFullscreen();
     document.addEventListener('fullscreenchange', handleFullscreenChange);
+    window.addEventListener('keydown', handleKeydown);
   });
 
   onDestroy(() => {
     document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    window.removeEventListener('keydown', handleKeydown);
   });
 </script>
 

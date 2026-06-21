@@ -11,13 +11,9 @@ function applyTheme(themeId: string): void {
   const theme = THEMES.find(t => t.id === themeId);
   if (!theme || !browser) return;
   const root = document.documentElement.style;
-  // Drive the real design-system token so the whole app recolors.
+  // Drive the shadcn --primary token so the whole app recolors.
   root.setProperty('--primary', theme.primaryHsl);
   root.setProperty('--ring', theme.primaryHsl);
-  // Keep the legacy vars for any code still reading them.
-  root.setProperty('--theme-primary', theme.primary);
-  root.setProperty('--theme-secondary', theme.secondary);
-  root.setProperty('--theme-accent', theme.accent);
 }
 
 export const themes = {

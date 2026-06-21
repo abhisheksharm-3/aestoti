@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { Headphones, Play, Pause } from '@lucide/svelte';
   import { sounds } from '$lib/stores/sounds.svelte';
   import { settings } from '$lib/stores/settings.svelte';
@@ -32,6 +33,14 @@
   function onWindowKey(event: KeyboardEvent): void {
     if (open && event.key === 'Escape') open = false;
   }
+
+  // An idle preview is only audible while the popover is open. Closing it (or
+  // unmounting) ends the preview; a running focus block keeps its own ambient
+  // going via the Pomodoro effect, independent of `previewing`.
+  $effect(() => {
+    if (!open) sounds.setPreview(false);
+  });
+  onDestroy(() => sounds.setPreview(false));
 </script>
 
 <svelte:window onclick={onWindowPointer} onkeydown={onWindowKey} />

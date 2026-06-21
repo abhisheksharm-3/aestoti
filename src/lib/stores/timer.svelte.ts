@@ -92,13 +92,17 @@ function restoreRunState(): void {
   state.currentMode = snap.currentMode;
   state.focusSessionCount = snap.focusSessionCount;
   const recovery = computeTimerRecovery(snap, Date.now());
-  if (recovery?.resume) {
+  const fullDuration = getModeDuration(state.currentMode);
+  // Resume only a plausible deadline. A remaining span longer than the mode's
+  // own length means a stale/tampered snapshot (e.g. the clock moved backward);
+  // resuming it would later record a wildly inflated session, so reset instead.
+  if (recovery?.resume && recovery.remainingSeconds <= fullDuration) {
     state.remainingSeconds = recovery.remainingSeconds;
     // Keep the original start time so the resumed session records its true span.
     modeStartTime = snap.modeStartTime ? new Date(snap.modeStartTime) : new Date();
     timer.start();
   } else {
-    state.remainingSeconds = getModeDuration(state.currentMode);
+    state.remainingSeconds = fullDuration;
   }
 }
 
