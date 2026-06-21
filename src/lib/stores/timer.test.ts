@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { timer, computeTimerRecovery, type TimerSnapshot } from './timer.svelte';
+import { timer, computeTimerRecovery, type TimerSnapshotType } from './timer.svelte';
 import { settings } from './settings.svelte';
 
-const runningSnap: TimerSnapshot = {
+const runningSnap: TimerSnapshotType = {
   currentMode: 'focus',
   focusSessionCount: 0,
   isRunning: true,

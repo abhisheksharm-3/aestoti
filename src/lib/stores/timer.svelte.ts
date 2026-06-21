@@ -6,7 +6,7 @@ import type { PomodoroModeType, TimerStateType, SessionCompleteCallbackType } fr
 const STORAGE_KEY = 'aestoti_timer';
 
 /** Serializable timer state, persisted so a reload can resume a live session. */
-export type TimerSnapshot = {
+export type TimerSnapshotType = {
   currentMode: PomodoroModeType;
   focusSessionCount: number;
   isRunning: boolean;
@@ -20,7 +20,7 @@ export type TimerSnapshot = {
  * deadline is still in the future; otherwise the caller resets the mode.
  */
 export function computeTimerRecovery(
-  snap: TimerSnapshot,
+  snap: TimerSnapshotType,
   nowMs: number
 ): { resume: boolean; remainingSeconds: number } | null {
   if (!snap.isRunning || snap.deadline == null) return null;
@@ -66,7 +66,7 @@ function stopInterval(): void {
 
 function persistRunState(): void {
   if (!browser) return;
-  const snap: TimerSnapshot = {
+  const snap: TimerSnapshotType = {
     currentMode: state.currentMode,
     focusSessionCount: state.focusSessionCount,
     isRunning: state.isRunning,
@@ -77,10 +77,10 @@ function persistRunState(): void {
 }
 
 function restoreRunState(): void {
-  let snap: TimerSnapshot | null = null;
+  let snap: TimerSnapshotType | null = null;
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) snap = JSON.parse(stored) as TimerSnapshot;
+    if (stored) snap = JSON.parse(stored) as TimerSnapshotType;
   } catch {
     snap = null;
   }

@@ -27,10 +27,10 @@
     sounds.setPreview(!sounds.previewing);
   }
 
-  function onWindowPointer(event: MouseEvent): void {
+  function handleWindowPointer(event: MouseEvent): void {
     if (open && wrapperEl && !wrapperEl.contains(event.target as Node)) open = false;
   }
-  function onWindowKey(event: KeyboardEvent): void {
+  function handleWindowKey(event: KeyboardEvent): void {
     if (open && event.key === 'Escape') open = false;
   }
 
@@ -43,7 +43,7 @@
   onDestroy(() => sounds.setPreview(false));
 </script>
 
-<svelte:window onclick={onWindowPointer} onkeydown={onWindowKey} />
+<svelte:window onclick={handleWindowPointer} onkeydown={handleWindowKey} />
 
 <div class="relative" bind:this={wrapperEl}>
   <button
