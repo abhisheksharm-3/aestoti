@@ -32,23 +32,10 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
-/* Tailwind v4 dropped tailwind.config.js, which had defined the Roboto Flex font
-   and a centered/padded `container`. Both are restored here (Preferences.svelte
-   still uses the `container` class). */
-@utility container {
-  margin-inline: auto;
-  padding-inline: 2rem;
-  @variant 2xl {
-    max-width: 1400px;
-  }
-}
-
 @layer base {
-  /* Light "paper": warm off-white, ink tinted toward the brand red.
-     --primary/--ring are overwritten at runtime by the active theme (tomato by
-     default) so the whole instrument recolors. */
   /* Editorial "paper" — warm off-white stock, near-black ink, deep tomato accent.
-     --primary/--ring are set at runtime by the active theme (tomato by default). */
+     --primary/--ring are set at runtime by the active theme (tomato by default)
+     so the whole instrument recolors. */
   :root {
     --background: 39 38% 93%;
     --foreground: 20 13% 9%;
