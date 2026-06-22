@@ -85,7 +85,7 @@
           min="0"
           max="100"
           value={sounds.current.ambientVolume}
-          oninput={(e) => sounds.setAmbientVolume(Number(e.currentTarget.value))}
+          oninput={e => sounds.setAmbientVolume(Number(e.currentTarget.value))}
           class="h-1 flex-1 accent-primary"
           aria-label="Ambient volume"
         />

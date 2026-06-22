@@ -109,7 +109,7 @@ describe('exportToCSV escaping & injection safety', () => {
     expect(row.endsWith('"\'=SUM(A1,A9)"')).toBe(true);
   });
 
-  it.each(['+1', '-1', '@cmd'])('neutralizes leading formula char in %s', (note) => {
+  it.each(['+1', '-1', '@cmd'])('neutralizes leading formula char in %s', note => {
     const csv = exportToCSV([session({ note })]);
     const row = csv.split('\n')[1];
     expect(row.endsWith(`'${note}`)).toBe(true);

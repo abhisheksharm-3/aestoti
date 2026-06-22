@@ -23,7 +23,7 @@
   let previousMode = $state<keyof typeof MODE_CONFIG>('focus');
 
   let currentTitle = $derived(MODE_CONFIG[timer.state.currentMode].title);
-  let activeTask = $derived(tasks.tasks.find((t) => t.id === tasks.activeTaskId));
+  let activeTask = $derived(tasks.tasks.find(t => t.id === tasks.activeTaskId));
   let goalTarget = $derived(goals.current.targetSessions);
   let sessionsToday = $derived(analytics.summary.sessionsToday);
   let streak = $derived(analytics.summary.currentStreak);
@@ -32,7 +32,7 @@
     start.setHours(0, 0, 0, 0);
     return Math.round(
       analytics.sessions
-        .filter((s) => s.mode === 'focus' && new Date(s.startTime) >= start)
+        .filter(s => s.mode === 'focus' && new Date(s.startTime) >= start)
         .reduce((sum, s) => sum + s.durationSeconds, 0) / 60
     );
   });

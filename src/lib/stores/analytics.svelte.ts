@@ -28,9 +28,9 @@ const summary = $derived.by<AnalyticsSummaryType>(() => {
     totalFocusMinutes: totalMinutes,
     averageSessionMinutes: focus.length > 0 ? Math.round(totalMinutes / focus.length) : 0,
     longestSessionMinutes: Math.floor(longestSession / 60),
-    totalDays: new Set(focus.map((s) => dayKey(s.startTime))).size,
-    sessionsToday: focus.filter((s) => new Date(s.startTime) >= today).length,
-    sessionsThisWeek: focus.filter((s) => new Date(s.startTime) >= weekAgo).length,
+    totalDays: new Set(focus.map(s => dayKey(s.startTime))).size,
+    sessionsToday: focus.filter(s => new Date(s.startTime) >= today).length,
+    sessionsThisWeek: focus.filter(s => new Date(s.startTime) >= weekAgo).length,
     currentStreak: calculateStreak(focus)
   };
 });
@@ -40,7 +40,7 @@ const weeklyFocusScore = $derived.by(() => {
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
   weekAgo.setHours(0, 0, 0, 0);
-  const recent = focusOnly(sessions).filter((s) => new Date(s.startTime) >= weekAgo);
+  const recent = focusOnly(sessions).filter(s => new Date(s.startTime) >= weekAgo);
   if (recent.length === 0) return 0;
   return Math.round(recent.reduce((sum, s) => sum + sessionFocusScore(s), 0) / recent.length);
 });
@@ -98,15 +98,15 @@ export const analytics = {
       writeStorage(STORAGE_KEY, JSON.stringify(sessions));
       return incoming.length;
     }
-    const existingIds = new Set(sessions.map((s) => s.id));
-    const fresh = incoming.filter((s) => !existingIds.has(s.id));
+    const existingIds = new Set(sessions.map(s => s.id));
+    const fresh = incoming.filter(s => !existingIds.has(s.id));
     sessions = [...sessions, ...fresh];
     writeStorage(STORAGE_KEY, JSON.stringify(sessions));
     return fresh.length;
   },
 
   addNote(sessionId: string, note: string): void {
-    sessions = sessions.map((s) => (s.id === sessionId ? { ...s, note } : s));
+    sessions = sessions.map(s => (s.id === sessionId ? { ...s, note } : s));
     writeStorage(STORAGE_KEY, JSON.stringify(sessions));
   },
 

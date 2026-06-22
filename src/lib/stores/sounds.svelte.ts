@@ -32,7 +32,7 @@ function clampVolume(value: unknown, fallback: number): number {
 }
 
 /** Merge persisted sound settings over defaults, clamping volumes and rejecting non-string ids. */
-function sanitizeSounds(raw: Partial<SoundSettingsType>): SoundSettingsType {
+export function sanitizeSounds(raw: Partial<SoundSettingsType>): SoundSettingsType {
   return {
     ambientSoundId: typeof raw.ambientSoundId === 'string' ? raw.ambientSoundId : DEFAULT_SETTINGS.ambientSoundId,
     ambientVolume: clampVolume(raw.ambientVolume, DEFAULT_SETTINGS.ambientVolume),

@@ -11,7 +11,7 @@ export function trapFocus(node: HTMLElement) {
 
   const focusable = () =>
     Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-      (el) => el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement
+      el => el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement
     );
 
   function handleKeydown(event: KeyboardEvent): void {

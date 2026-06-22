@@ -9,11 +9,10 @@ export type {
 export type {
   PomodoroSessionType,
   AnalyticsSummaryType,
-  HourlyProductivityType,
-  DailySessionDataType
+  HourlyProductivityType
 } from './analytics';
 export type { TaskType } from './tasks';
-export type { DailyGoalType, DailyProgressType } from './goals';
+export type { DailyGoalType } from './goals';
 export type { TimerPresetType, PresetsStateType } from './presets';
 export type { ThemeType } from './theme';
 export type { ShortcutActionType, ShortcutType } from './shortcuts';

@@ -1,4 +1,4 @@
-import type { PomodoroSessionType, DailySessionDataType, HourlyProductivityType } from '$lib/types';
+import type { PomodoroSessionType, HourlyProductivityType } from '$lib/types';
 import { dayKey } from './date';
 
 /** Reference length of one focus block, used to benchmark a session's focus score. */
@@ -6,7 +6,7 @@ const DEFAULT_FOCUS_SECONDS = 25 * 60;
 
 /** Filter a session list down to focus blocks, dropping breaks. */
 export function focusOnly(sessions: PomodoroSessionType[]): PomodoroSessionType[] {
-  return sessions.filter((s) => s.mode === 'focus');
+  return sessions.filter(s => s.mode === 'focus');
 }
 
 /**
@@ -20,7 +20,7 @@ export function focusOnly(sessions: PomodoroSessionType[]): PomodoroSessionType[
  */
 export function calculateStreak(sessions: PomodoroSessionType[]): number {
   if (sessions.length === 0) return 0;
-  const uniqueDays = [...new Set(sessions.map((s) => dayKey(s.startTime)))].sort().reverse();
+  const uniqueDays = [...new Set(sessions.map(s => dayKey(s.startTime)))].sort().reverse();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const yesterday = new Date(today);
@@ -47,33 +47,6 @@ export function sessionFocusScore(session: PomodoroSessionType): number {
     Math.floor((session.durationSeconds / DEFAULT_FOCUS_SECONDS) * 50)
   );
   return completionBonus + durationBonus;
-}
-
-/** Bucket focus sessions into the last `days` calendar days, keyed by local day so the grid aligns with the streak and "today" counters. */
-export function calculateDailyData(
-  sessions: PomodoroSessionType[],
-  days: number = 365
-): DailySessionDataType[] {
-  const focusSessions = sessions.filter(s => s.mode === 'focus');
-  const dailyMap = new Map<string, DailySessionDataType>();
-
-  const today = new Date();
-  for (let i = 0; i < days; i++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const dateStr = dayKey(date);
-    dailyMap.set(dateStr, { date: dateStr, sessionCount: 0, totalMinutes: 0 });
-  }
-
-  focusSessions.forEach(session => {
-    const existing = dailyMap.get(dayKey(session.startTime));
-    if (existing) {
-      existing.sessionCount++;
-      existing.totalMinutes += Math.round(session.durationSeconds / 60);
-    }
-  });
-
-  return Array.from(dailyMap.values()).reverse();
 }
 
 export function calculateHourlyProductivity(

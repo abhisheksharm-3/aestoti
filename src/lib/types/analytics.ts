@@ -26,9 +26,3 @@ export type HourlyProductivityType = {
   sessionCount: number;
   totalMinutes: number;
 };
-
-export type DailySessionDataType = {
-  date: string;
-  sessionCount: number;
-  totalMinutes: number;
-};

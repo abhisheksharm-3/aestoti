@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import {
-  calculateDailyData,
   calculateHourlyProductivity,
   getMostProductiveHour,
   formatHour
@@ -48,19 +47,5 @@ describe('calculateHourlyProductivity', () => {
 
   it('returns hour 0 as most productive when there is no data', () => {
     expect(getMostProductiveHour(calculateHourlyProductivity([]))).toBe(0);
-  });
-});
-
-describe('calculateDailyData', () => {
-  it('returns one bucket per requested day, oldest first', () => {
-    const data = calculateDailyData([], 7);
-    expect(data).toHaveLength(7);
-    expect(new Date(data[0].date).getTime()).toBeLessThan(new Date(data[6].date).getTime());
-  });
-
-  it('counts a focus session into today and ignores breaks', () => {
-    const today = new Date().toISOString();
-    const data = calculateDailyData([session({ startTime: today }), session({ mode: 'longBreak', startTime: today })], 7);
-    expect(data[data.length - 1].sessionCount).toBe(1);
   });
 });

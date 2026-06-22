@@ -31,14 +31,14 @@
     <div class="mt-4 divide-y divide-border/70">
       <div class="flex items-center justify-between gap-8 py-4">
         {@render field('Dark Mode', 'Use a dark interface.', 'mode')}
-        <Switch id="mode" checked={isDarkMode} onCheckedChange={(v) => setMode(v ? 'dark' : 'light')} />
+        <Switch id="mode" checked={isDarkMode} onCheckedChange={v => setMode(v ? 'dark' : 'light')} />
       </div>
       <div class="flex items-center justify-between gap-8 py-4">
         {@render field('Auto Resume Timer', 'Start the next block automatically.', 'timer-auto')}
         <Switch
           id="timer-auto"
           checked={settings.current.isAutoTime}
-          onCheckedChange={(v) => handleSettingChange('isAutoTime', v)}
+          onCheckedChange={v => handleSettingChange('isAutoTime', v)}
         />
       </div>
       <div class="flex items-center justify-between gap-8 py-4">
@@ -46,7 +46,7 @@
         <Switch
           id="sound"
           checked={settings.current.hasSound}
-          onCheckedChange={(v) => handleSettingChange('hasSound', v)}
+          onCheckedChange={v => handleSettingChange('hasSound', v)}
         />
       </div>
       <div class="flex items-center justify-between gap-8 py-4">
@@ -54,7 +54,7 @@
         <Switch
           id="notification"
           checked={settings.current.hasNotification}
-          onCheckedChange={(v) => handleSettingChange('hasNotification', v)}
+          onCheckedChange={v => handleSettingChange('hasNotification', v)}
         />
       </div>
       <div class="flex items-center justify-between gap-8 py-4">
@@ -62,7 +62,7 @@
         <Switch
           id="break-prompts"
           checked={settings.current.hasBreakPrompts}
-          onCheckedChange={(v) => handleSettingChange('hasBreakPrompts', v)}
+          onCheckedChange={v => handleSettingChange('hasBreakPrompts', v)}
         />
       </div>
     </div>
@@ -76,7 +76,7 @@
         <Switch
           id="goal-enabled"
           checked={goals.current.isEnabled}
-          onCheckedChange={(v) => {
+          onCheckedChange={v => {
             if (v !== goals.current.isEnabled) goals.toggle();
           }}
         />
@@ -92,7 +92,7 @@
             id="goal-target"
             disabled={!goals.current.isEnabled}
             value={goals.current.targetSessions}
-            onchange={(e) => goals.setTarget(Number(e.currentTarget.value))}
+            onchange={e => goals.setTarget(Number(e.currentTarget.value))}
           />
           <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">/ day</span>
         </div>
@@ -113,7 +113,7 @@
             class="h-9 w-16 rounded-md text-right tabular-nums"
             id="focus-length"
             value={settings.current.focusLength}
-            onchange={(e) => handleSettingChange('focusLength', Number(e.currentTarget.value))}
+            onchange={e => handleSettingChange('focusLength', Number(e.currentTarget.value))}
           />
           <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">min</span>
         </div>
@@ -128,7 +128,7 @@
             class="h-9 w-16 rounded-md text-right tabular-nums"
             id="long-break-interval"
             value={settings.current.longBreakInterval}
-            onchange={(e) => handleSettingChange('longBreakInterval', Number(e.currentTarget.value))}
+            onchange={e => handleSettingChange('longBreakInterval', Number(e.currentTarget.value))}
           />
           <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">blocks</span>
         </div>
@@ -143,7 +143,7 @@
             class="h-9 w-16 rounded-md text-right tabular-nums"
             id="short-length"
             value={settings.current.shortLength}
-            onchange={(e) => handleSettingChange('shortLength', Number(e.currentTarget.value))}
+            onchange={e => handleSettingChange('shortLength', Number(e.currentTarget.value))}
           />
           <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">min</span>
         </div>
@@ -158,7 +158,7 @@
             class="h-9 w-16 rounded-md text-right tabular-nums"
             id="long-length"
             value={settings.current.longLength}
-            onchange={(e) => handleSettingChange('longLength', Number(e.currentTarget.value))}
+            onchange={e => handleSettingChange('longLength', Number(e.currentTarget.value))}
           />
           <span class="w-10 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">min</span>
         </div>

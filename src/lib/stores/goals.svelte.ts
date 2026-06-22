@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import type { DailyGoalType, DailyProgressType, PomodoroSessionType } from '$lib/types';
+import type { DailyGoalType } from '$lib/types';
 import { writeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_goals';
@@ -44,20 +44,3 @@ export const goals = {
     persist();
   }
 };
-
-/** Compute today's goal progress — completed focus sessions against the target — from a session list. */
-export function computeDailyProgress(
-  sessions: PomodoroSessionType[],
-  goal: DailyGoalType
-): DailyProgressType {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const completed = sessions.filter(
-    s => s.mode === 'focus' && s.isCompleted && new Date(s.startTime) >= today
-  ).length;
-  const percentage =
-    goal.targetSessions > 0
-      ? Math.min(100, Math.round((completed / goal.targetSessions) * 100))
-      : 0;
-  return { completed, target: goal.targetSessions, percentage, isGoalMet: completed >= goal.targetSessions };
-}
