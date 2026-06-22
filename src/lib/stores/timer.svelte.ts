@@ -99,10 +99,6 @@ export const timer = {
     };
   },
 
-  get totalSeconds(): number {
-    return getModeDuration(state.currentMode);
-  },
-
   /** Whole-minute length of the current mode's block, for display. */
   get totalMinutes(): number {
     return Math.round(getModeDuration(state.currentMode) / 60);

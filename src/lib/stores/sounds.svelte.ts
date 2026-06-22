@@ -86,16 +86,6 @@ export const sounds = {
     isPreviewing = value;
   },
 
-  setNotificationSound(soundId: string): void {
-    current = { ...current, notificationSoundId: soundId };
-    persist();
-  },
-
-  setNotificationVolume(volume: number): void {
-    current = { ...current, notificationVolume: Math.min(100, Math.max(0, volume)) };
-    persist();
-  },
-
   /**
    * Single source of truth for ambient playback. `active` is the caller's full
    * intent (a focus session running or a preview, with sound enabled); this
