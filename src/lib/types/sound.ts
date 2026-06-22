@@ -4,3 +4,11 @@ export type SoundPresetType = {
   icon: string;
   src: string;
 };
+
+/** Persisted ambient + notification sound selection and volumes. */
+export type SoundSettingsType = {
+  ambientSoundId: string;
+  ambientVolume: number;
+  notificationSoundId: string;
+  notificationVolume: number;
+};

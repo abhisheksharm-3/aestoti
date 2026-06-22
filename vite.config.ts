@@ -25,9 +25,9 @@ export default defineConfig({
           { src: '/icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
-      // Precache the app shell for instant offline load. The large ambient
-      // .mp3 files in /sounds/ stay on-demand, but the small notification cue
-      // (root-level) is precached so the timer-complete chime works offline.
+      // Precache the app shell for instant offline load. The large ambient .mp3
+      // files in /sounds/ stay on-demand; only the small timer-complete chime
+      // (matched by name) is precached so it plays offline.
       workbox: { globPatterns: ['**/*.{js,css,html,png,svg,woff2}', '**/clock-sound-tick.mp3'] }
     })
   ],

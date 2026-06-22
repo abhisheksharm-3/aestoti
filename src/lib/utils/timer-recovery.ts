@@ -1,19 +1,4 @@
-import type { PomodoroModeType } from '$lib/types';
-
-/** Serializable timer state, persisted so a reload can resume a live session. */
-export type TimerSnapshotType = {
-  currentMode: PomodoroModeType;
-  focusSessionCount: number;
-  isRunning: boolean;
-  deadline: number | null;
-  modeStartTime: string | null;
-};
-
-/** Outcome of evaluating a persisted snapshot: whether to resume, and with how many seconds left. */
-export type TimerRecoveryType = {
-  resume: boolean;
-  remainingSeconds: number;
-};
+import type { TimerSnapshotType, TimerRecoveryType } from '$lib/types';
 
 /**
  * Decide what to do with a persisted snapshot on load. Pure so it can be tested

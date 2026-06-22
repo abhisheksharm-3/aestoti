@@ -6,7 +6,7 @@
   /** Monday-first weekday rows, labelling every other row like GitHub's heatmap. */
   const DAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', ''];
 
-  type Cell = { date: string; count: number; isToday: boolean; isFuture: boolean };
+  type CellType = { date: string; count: number; isToday: boolean; isFuture: boolean };
 
   let dailyMap = $derived(buildDailyMap(analytics.sessions));
   let columns = $derived(buildColumns(dailyMap));
@@ -25,7 +25,7 @@
   }
 
   /** Build a week-aligned grid (each column a Mon–Sun week) so weekday rows and month labels line up; days after today are left blank. */
-  function buildColumns(map: Map<string, number>): Cell[][] {
+  function buildColumns(map: Map<string, number>): CellType[][] {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayK = dayKey(today);
@@ -33,9 +33,9 @@
     const firstMonday = new Date(today);
     firstMonday.setDate(today.getDate() - sinceMonday - (WEEKS - 1) * 7);
 
-    const cols: Cell[][] = [];
+    const cols: CellType[][] = [];
     for (let w = 0; w < WEEKS; w++) {
-      const col: Cell[] = [];
+      const col: CellType[] = [];
       for (let d = 0; d < 7; d++) {
         const date = new Date(firstMonday);
         date.setDate(firstMonday.getDate() + w * 7 + d);
@@ -53,7 +53,7 @@
   }
 
   /** Label a column with its month abbreviation at each month boundary. */
-  function buildMonthLabels(cols: Cell[][]): string[] {
+  function buildMonthLabels(cols: CellType[][]): string[] {
     const labels: string[] = new Array(cols.length).fill('');
     let prevMonth = -1;
     cols.forEach((col, i) => {

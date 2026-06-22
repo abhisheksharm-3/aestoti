@@ -1,15 +1,10 @@
 import { browser } from '$app/environment';
-import type { TimerPresetType } from '$lib/types';
+import type { TimerPresetType, PresetsStateType } from '$lib/types';
 import { DEFAULT_PRESETS } from '$lib/config/presets';
 import { generateId } from '$lib/utils/id';
 import { writeStorage } from '$lib/utils/storage';
 
 const STORAGE_KEY = 'aestoti_presets';
-
-type PresetsStateType = {
-  presets: TimerPresetType[];
-  activePresetId: string | null;
-};
 
 function isValidPreset(value: unknown): value is TimerPresetType {
   if (typeof value !== 'object' || value === null) return false;

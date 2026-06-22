@@ -1,8 +1,13 @@
 import { browser } from '$app/environment';
 import { settings } from './settings.svelte';
 import { writeStorage } from '$lib/utils/storage';
-import type { PomodoroModeType, TimerStateType, SessionCompleteCallbackType } from '$lib/types';
-import { computeTimerRecovery, type TimerSnapshotType } from '$lib/utils/timer-recovery';
+import type {
+  PomodoroModeType,
+  TimerStateType,
+  SessionCompleteCallbackType,
+  TimerSnapshotType
+} from '$lib/types';
+import { computeTimerRecovery } from '$lib/utils/timer-recovery';
 
 const STORAGE_KEY = 'aestoti_timer';
 

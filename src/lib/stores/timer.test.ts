@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { timer } from './timer.svelte';
-import { computeTimerRecovery, type TimerSnapshotType } from '$lib/utils/timer-recovery';
+import { computeTimerRecovery } from '$lib/utils/timer-recovery';
+import type { TimerSnapshotType } from '$lib/types';
 import { settings } from './settings.svelte';
 
 const runningSnap: TimerSnapshotType = {

@@ -4,7 +4,7 @@ import { SOUND_PRESETS, NOTIFICATION_SOUNDS } from '$lib/config/sounds';
 import { LOFI_STATIONS } from '$lib/config/lofi';
 import { audioEngine } from '$lib/services/audio';
 import { writeStorage } from '$lib/utils/storage';
-import type { SoundPresetType } from '$lib/types';
+import type { SoundPresetType, SoundSettingsType } from '$lib/types';
 
 const STORAGE_KEY = 'aestoti_sounds';
 
@@ -12,13 +12,6 @@ const STORAGE_KEY = 'aestoti_sounds';
 function findSource(id: string): SoundPresetType | undefined {
   return SOUND_PRESETS.find(p => p.id === id) ?? LOFI_STATIONS.find(p => p.id === id);
 }
-
-type SoundSettingsType = {
-  ambientSoundId: string;
-  ambientVolume: number;
-  notificationSoundId: string;
-  notificationVolume: number;
-};
 
 const DEFAULT_SETTINGS: SoundSettingsType = {
   ambientSoundId: 'none',
